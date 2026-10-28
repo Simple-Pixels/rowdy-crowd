@@ -19,6 +19,7 @@ final class Plugin {
 	 */
 	private const MODULES = array(
 		\RowdyCrowd\Modules\Hello_World\Module::class,
+		\RowdyCrowd\Modules\Geolocation\Module::class,
 	);
 
 	private static ?Plugin $instance = null;
