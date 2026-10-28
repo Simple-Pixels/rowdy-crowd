@@ -46,6 +46,19 @@ From the scoping doc and rough hours estimate (Oct 2026). Items marked *(plugin)
 | Geolocation *(plugin)* | AU/US detection, dynamic content, pricing integration, printer-based order notifications, CookieYes and GDPR compliance. |
 | Quote generation *(plugin)* | Quote generation logic and WooCommerce integration. Keep a traditional enquiry pathway for customers who need help. |
 
+### Geolocation and regions (spec, Oct 2026)
+
+Built in `modules/geolocation/`. See its README for details.
+
+- Two versions of the site, **AU and US**, with **one central editing point** (single WP install).
+- Domains: **rowdycrowd.com.au = AU** (region key `aunz`), **rowdycrowd.com = US** (region key `usa`). The domain decides the region, which keeps Kinsta page caching correct.
+- All elements are visible by default. Class **`.aunz`** = AU visitors only; class **`.usa`** = US visitors only.
+- Default region is AU. Visitors geolocated in the **US, Canada or Mexico** go to the US site. Uses **Kinsta IP geolocation** (`$_SERVER['GEOIP_COUNTRY_CODE']`), looked up client-side through a REST endpoint because cached pages don't run PHP.
+- Visitors can change region with the **`[region_switcher]`** shortcode (dropdown with flag). Their choice is stored per domain in the `rowdy_crowd_region` cookie and wins over geolocation. The shortcode name was specified by the client, so it isn't prefixed.
+- Search bots are never geo-redirected.
+- Known limitation: carts and logins don't carry across the two domains.
+- Other modules needing the region (e.g. AU/US pricing) should call `RowdyCrowd\Modules\Geolocation\Region::current()`.
+
 ### Homepage (approved wireframe)
 
 Top bar (geolocation/shipping notice), header nav (Shop Our Range, Custom Printing, For Businesses, Event Categories, Our Story, Shop Online CTA), hero ("SUSTAIN-able"), product category tiles (Wine Tumblers, Champagne Flutes, Gin Balloons, Beer Schooners, Accessories), "Make it your own" and "Business and wholesale" panels, USP icons (dishwasher safe, 100% recyclable, unbreakable, reusable), video plus "three easy steps" custom-order explainer, press logos, event category tiles (Wineries/Distilleries/Venues, Community and Corporate Events, Weddings, Party and Catering Packs, Family Packs and Gifting), reviews carousel, About section, featured bundles carousel, "reUSE-able" banner, newsroom, #gettingrowdycrowd social feed, newsletter signup, footer.
@@ -86,3 +99,5 @@ modules/<module-id>/      One folder per feature (RowdyCrowd\Modules\<Module_Id>
 ## Environment notes
 
 - PHP isn't installed on the local dev machine, so code can't be linted or run locally. Test on the deployed site.
+- Hosting is **Kinsta** (server page cache, IP geolocation via MyKinsta → Tools). Assume pages are cached. Per-visitor logic must not depend on PHP running for every page view; use the domain, an uncached REST endpoint, or client-side JS.
+- Page builder not yet confirmed. The geolocation module assumes **Elementor** may be used (Advanced → CSS Classes; editor preview loads with `?elementor-preview`). Update this once confirmed.

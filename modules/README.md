@@ -36,3 +36,4 @@ Other classes in the module follow the same naming: `RowdyCrowd\Modules\Quote_Ge
 | Module | Status | Description |
 | --- | --- | --- |
 | [hello-world](hello-world/) | Placeholder | Confirms the plugin is deployed. |
+| [geolocation](geolocation/) | In progress | AU/US regions by domain, `aunz`/`usa` visibility classes, first-visit geo redirect, `[region_switcher]`. |

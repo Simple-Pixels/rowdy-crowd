@@ -1,0 +1,88 @@
+/**
+ * [region_switcher] styles. Override the custom properties in the theme to restyle.
+ */
+.rowdy-crowd-region-switcher {
+	--rowdy-crowd-switcher-bg: #fff;
+	--rowdy-crowd-switcher-color: inherit;
+	--rowdy-crowd-switcher-hover: rgba(0, 0, 0, 0.06);
+	--rowdy-crowd-switcher-radius: 6px;
+
+	position: relative;
+	display: inline-block;
+	font: inherit;
+}
+
+.rowdy-crowd-region-switcher__toggle {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5em;
+	padding: 0.35em 0.6em;
+	border: 0;
+	border-radius: var(--rowdy-crowd-switcher-radius);
+	background: transparent;
+	color: var(--rowdy-crowd-switcher-color);
+	font: inherit;
+	line-height: 1.2;
+	cursor: pointer;
+}
+
+.rowdy-crowd-region-switcher__toggle:hover,
+.rowdy-crowd-region-switcher__toggle:focus-visible {
+	background: var(--rowdy-crowd-switcher-hover);
+}
+
+.rowdy-crowd-region-switcher__chevron {
+	transition: transform 0.15s ease;
+}
+
+.rowdy-crowd-region-switcher__toggle[aria-expanded="true"] .rowdy-crowd-region-switcher__chevron {
+	transform: rotate(180deg);
+}
+
+.rowdy-crowd-region-switcher__flag {
+	display: block;
+	flex-shrink: 0;
+	width: 24px;
+	height: 16px;
+	border-radius: 2px;
+	object-fit: cover;
+	box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+.rowdy-crowd-region-switcher__menu {
+	position: absolute;
+	top: calc(100% + 4px);
+	right: 0;
+	z-index: 1000;
+	min-width: 100%;
+	margin: 0;
+	padding: 0.25em;
+	list-style: none;
+	border-radius: var(--rowdy-crowd-switcher-radius);
+	background: var(--rowdy-crowd-switcher-bg);
+	box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.rowdy-crowd-region-switcher__menu[hidden] {
+	display: none;
+}
+
+.rowdy-crowd-region-switcher__option {
+	display: flex;
+	align-items: center;
+	gap: 0.5em;
+	padding: 0.45em 0.6em;
+	border-radius: calc(var(--rowdy-crowd-switcher-radius) - 2px);
+	color: var(--rowdy-crowd-switcher-color);
+	text-decoration: none;
+	white-space: nowrap;
+}
+
+.rowdy-crowd-region-switcher__option:hover,
+.rowdy-crowd-region-switcher__option:focus-visible {
+	background: var(--rowdy-crowd-switcher-hover);
+}
+
+.rowdy-crowd-region-switcher__option[aria-current="true"] {
+	font-weight: 600;
+}
