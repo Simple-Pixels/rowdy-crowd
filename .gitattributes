@@ -1,0 +1,8 @@
+# Normalise line endings
+* text=auto eol=lf
+
+# Keep development files out of `git archive` builds
+/.gitattributes export-ignore
+/.gitignore     export-ignore
+/.github        export-ignore
+/CLAUDE.md      export-ignore
