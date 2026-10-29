@@ -90,6 +90,11 @@ modules/<module-id>/      One folder per feature (RowdyCrowd\Modules\<Module_Id>
 - **Keep external packages to a minimum.** Prefer WordPress and WooCommerce core APIs. Add a dependency only when it clearly saves a lot of work, and record it here.
 - Each module's README must stay accurate as the module changes.
 
+## Versioning and docs
+
+- Bump `ROWDY_CROWD_VERSION` and the plugin header together, and add a line to the Changelog in `README.md`.
+- Keep the root `README.md` (module table, shortcodes, file structure, gotchas) accurate alongside the module READMEs.
+
 ## Git workflow
 
 - **Never push directly to `main`.** Always work on a new branch, push it, and open a PR into `main`.
