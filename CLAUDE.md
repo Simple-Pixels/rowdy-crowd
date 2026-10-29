@@ -97,12 +97,24 @@ modules/<module-id>/      One folder per feature (RowdyCrowd\Modules\<Module_Id>
 
 ## Git workflow
 
-- **Never push directly to `main`.** Always work on a new branch, push it, and open a PR into `main`.
+- **Never push directly to `main`.** Always work on a new branch, push it, and open a PR into `main`. The one approved exception is the `Simple-Pixels/kinsta-deploy-setup` tool, which commits `.github/workflows/deploy.yml` straight to `main` when it is (re)run.
 - **Do not add "Co-Authored-By: Claude" or any Claude/AI attribution** to commit messages or PR descriptions.
 - Branch names: `feature/<short-description>`, `fix/<short-description>`.
+
+## Deployment
+
+- **Every push to `main` (i.e. every merged PR) deploys to the live Kinsta site** through GitHub Actions (`.github/workflows/deploy.yml`). It can also be run manually from the Actions tab ("Run workflow").
+- The workflow rsyncs the repo to `/www/rowdycrowd_579/public/wp-content/plugins/rowdy-crowd/` with `--delete`. Anything in that folder that isn't in the repo is removed, so never edit plugin files on the server.
+- Development-only files (`CLAUDE.md`, `README.md` files, `.git*`, `.github`, `.claude`) are excluded from the deploy. Add new dev-only files to the `--exclude` list so they don't become publicly readable.
+- Connection details live in the repo's Actions secrets: `KINSTA_SSH_HOST`, `KINSTA_SSH_PORT`, `KINSTA_SSH_USER`, `KINSTA_SSH_KEY`, `KINSTA_DEPLOY_PATH`. The deploy key (no passphrase) is `~/.ssh/kinsta-deploy-Simple-Pixels-rowdy-crowd` on the machine that ran the setup.
+- Set up with `Simple-Pixels/kinsta-deploy-setup`. It needed local fixes (Kinsta company ID, an SSH key passphrase bug under PowerShell 7, and a wrong guessed path) that aren't in that repo yet.
+- Live is a production site, so test risky changes on staging first.
 
 ## Environment notes
 
 - PHP isn't installed on the local dev machine, so code can't be linted or run locally. Test on the deployed site.
 - Hosting is **Kinsta** (server page cache, IP geolocation via MyKinsta → Tools). Assume pages are cached. Per-visitor logic must not depend on PHP running for every page view; use the domain, an uncached REST endpoint, or client-side JS.
-- Page builder not yet confirmed. The geolocation module assumes **Elementor** may be used (Advanced → CSS Classes; editor preview loads with `?elementor-preview`). Update this once confirmed.
+- The site is built with **Elementor and Elementor Pro**. Custom classes go in Advanced → CSS Classes; the editor preview loads with `?elementor-preview`.
+- Other plugins on live (Oct 2026): WooCommerce, WooCommerce Payments, ACF Pro, WP Rocket, Rank Math, WP Offload Media (amazon-s3-and-cloudfront-pro), Imagify, Members, WP Mail SMTP, MonsterInsights, Duplicate Post, Disable Comments, Classic Editor, Migrate Guru, WP Pusher.
+- **WP Rocket** adds another page cache. Clear it after deploys that change front-end output. The same "assume pages are cached" rule applies.
+- **WP Pusher** is installed but must not also deploy this repo; GitHub Actions is the only deploy path.

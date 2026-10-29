@@ -29,13 +29,13 @@ Each module has its own README with settings, hooks and files.
 | WordPress | 6.4+ |
 | PHP | 8.1+ |
 | Required plugins | None for the core. WooCommerce-dependent modules gate themselves with `is_enabled()`. |
-| Optional plugins | WooCommerce, Elementor (assumed page builder, not yet confirmed). |
+| Optional plugins | WooCommerce, Elementor / Elementor Pro (the site's page builder). |
 | Hosting | **Kinsta**: full-page cache and IP geolocation (MyKinsta → Tools → Geolocation). Both domains on the same site. |
 
 ## Installation
 
-1. Deploy the repository root to `wp-content/plugins/rowdy-crowd/`.
-2. Activate **Rowdy Crowd**.
+1. Deploys are automatic: every merge into `main` runs `.github/workflows/deploy.yml`, which rsyncs the repo to `wp-content/plugins/rowdy-crowd/` on the live Kinsta site. It can also be run manually from the Actions tab. Dev-only files (`CLAUDE.md`, READMEs, `.git*`) are excluded.
+2. Activate **Rowdy Crowd** (first install only).
 3. Administrators should see a green "Hello World from Rowdy Crowd" notice, which confirms the deployment.
 4. Follow each module's README for its setup (e.g. [geolocation hosting setup](modules/geolocation/README.md#hosting-setup-kinsta)).
 
@@ -84,6 +84,7 @@ includes/                    Core (RowdyCrowd\Core): Autoloader, Plugin, abstrac
 modules/                     One folder per feature                                      → modules/README.md
   geolocation/               AU/US regions, redirect, switcher                            → modules/geolocation/README.md
   hello-world/               Deployment check placeholder                                 → modules/hello-world/README.md
+.github/workflows/deploy.yml GitHub Actions deploy to Kinsta (on push to main)
 CLAUDE.md                    Project context, coding standards, git workflow
 ```
 
@@ -103,6 +104,8 @@ Module hooks are listed in each module's README (e.g. `rowdy_crowd_region`, `row
 - **Every new module must be registered** in `Plugin::MODULES` and listed in `modules/README.md`, or it won't load.
 - **WooCommerce-dependent modules must return false from `is_enabled()`** when Woo isn't active, so the plugin never fatals.
 - **PHP isn't installed locally**, so code can't be linted or run before deploying. Test on staging.
+- **Merging into `main` deploys to live**, and the deploy uses `rsync --delete`. Never edit plugin files on the server, and add any new dev-only files to the workflow's `--exclude` list.
+- **WP Rocket also caches pages.** Clear it after deploys that change front-end output.
 - Remove the hello-world module before launch.
 
 ## Development
