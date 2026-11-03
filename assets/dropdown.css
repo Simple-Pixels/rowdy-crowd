@@ -15,6 +15,7 @@
 	position: relative;
 	display: inline-block;
 	font: inherit;
+	font-size: 0.875em;
 }
 
 /* Selectors are doubled up so theme button styles (pink hover, uppercase, etc.) don't win. */
@@ -30,17 +31,22 @@
 	box-shadow: none;
 	color: var(--rowdy-crowd-dropdown-color);
 	font: inherit;
-	font-weight: 600;
+	font-weight: 500;
 	letter-spacing: normal;
 	line-height: 1.2;
 	text-transform: none;
 	cursor: pointer;
 }
 
+/*
+ * The Elementor kit sets `border-style: none` on button:hover and button:focus, which would
+ * remove the border and shrink the pill. The full border is repeated here so it never changes.
+ */
 .rowdy-crowd-dropdown .rowdy-crowd-dropdown__toggle:hover,
 .rowdy-crowd-dropdown .rowdy-crowd-dropdown__toggle:focus,
 .rowdy-crowd-dropdown .rowdy-crowd-dropdown__toggle:active {
-	border-color: var(--rowdy-crowd-dropdown-border);
+	border: 1px solid var(--rowdy-crowd-dropdown-border);
+	border-radius: 999px;
 	background: var(--rowdy-crowd-dropdown-hover);
 	color: var(--rowdy-crowd-dropdown-color);
 }
@@ -104,5 +110,5 @@
 }
 
 .rowdy-crowd-dropdown__option[aria-current="true"] {
-	font-weight: 700;
+	font-weight: 600;
 }
