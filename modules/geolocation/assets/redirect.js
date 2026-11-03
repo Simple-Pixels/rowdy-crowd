@@ -25,10 +25,16 @@
 		document.cookie = config.cookie + '=' + region + '; path=/; max-age=31536000; samesite=lax' + secure;
 	};
 
-	const goTo = ( region ) => {
+	// withCurrency also switches WooPayments to the region's currency (see Region::currencies()).
+	const goTo = ( region, withCurrency ) => {
 		const url = new URL( window.location.href );
 		url.host = config.domains[ region ];
 		url.searchParams.set( config.queryVar, region );
+
+		if ( withCurrency && config.currencies[ region ] ) {
+			url.searchParams.set( config.currencyVar, config.currencies[ region ] );
+		}
+
 		window.location.replace( url.toString() );
 	};
 
@@ -43,12 +49,12 @@
 		return;
 	}
 
-	// Returning visitor: keep them on the region they chose.
+	// Returning visitor: keep them on the region they chose. Their currency choice on that domain stays as it was.
 	const saved = readCookie();
 
 	if ( isRegion( saved ) ) {
 		if ( saved !== config.region ) {
-			goTo( saved );
+			goTo( saved, false );
 		}
 		return;
 	}
@@ -74,7 +80,7 @@
 			if ( data.region === config.region ) {
 				reveal();
 			} else {
-				goTo( data.region );
+				goTo( data.region, true );
 			}
 		} )
 		.catch( reveal );

@@ -1,0 +1,108 @@
+/**
+ * Shared dropdown (region and currency switchers).
+ *
+ * Transparent toggle with a white border, sized for the blue header and footer.
+ * Override the custom properties on .rowdy-crowd-dropdown to restyle.
+ */
+.rowdy-crowd-dropdown {
+	--rowdy-crowd-dropdown-color: #fff;
+	--rowdy-crowd-dropdown-border: #fff;
+	--rowdy-crowd-dropdown-hover: rgba(255, 255, 255, 0.18);
+	--rowdy-crowd-dropdown-menu-bg: #fff;
+	--rowdy-crowd-dropdown-menu-color: #1d2327;
+	--rowdy-crowd-dropdown-menu-hover: rgba(0, 0, 0, 0.07);
+
+	position: relative;
+	display: inline-block;
+	font: inherit;
+}
+
+/* Selectors are doubled up so theme button styles (pink hover, uppercase, etc.) don't win. */
+.rowdy-crowd-dropdown .rowdy-crowd-dropdown__toggle {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.6em;
+	margin: 0;
+	padding: 0.35em 0.9em;
+	border: 1px solid var(--rowdy-crowd-dropdown-border);
+	border-radius: 999px;
+	background: transparent;
+	box-shadow: none;
+	color: var(--rowdy-crowd-dropdown-color);
+	font: inherit;
+	font-weight: 600;
+	letter-spacing: normal;
+	line-height: 1.2;
+	text-transform: none;
+	cursor: pointer;
+}
+
+.rowdy-crowd-dropdown .rowdy-crowd-dropdown__toggle:hover,
+.rowdy-crowd-dropdown .rowdy-crowd-dropdown__toggle:focus,
+.rowdy-crowd-dropdown .rowdy-crowd-dropdown__toggle:active {
+	border-color: var(--rowdy-crowd-dropdown-border);
+	background: var(--rowdy-crowd-dropdown-hover);
+	color: var(--rowdy-crowd-dropdown-color);
+}
+
+.rowdy-crowd-dropdown .rowdy-crowd-dropdown__toggle:focus-visible {
+	outline: 2px solid var(--rowdy-crowd-dropdown-border);
+	outline-offset: 2px;
+}
+
+.rowdy-crowd-dropdown__chevron {
+	flex-shrink: 0;
+	transition: transform 0.15s ease;
+}
+
+.rowdy-crowd-dropdown__toggle[aria-expanded="true"] .rowdy-crowd-dropdown__chevron {
+	transform: rotate(180deg);
+}
+
+.rowdy-crowd-dropdown__menu {
+	position: absolute;
+	top: calc(100% + 6px);
+	left: 0;
+	z-index: 1000;
+	min-width: 100%;
+	margin: 0;
+	padding: 0.35em;
+	list-style: none;
+	border-radius: 12px;
+	background: var(--rowdy-crowd-dropdown-menu-bg);
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+}
+
+.rowdy-crowd-dropdown__menu[hidden] {
+	display: none;
+}
+
+/* Set by dropdown.js when the menu would run off the screen. */
+.rowdy-crowd-dropdown--up .rowdy-crowd-dropdown__menu {
+	top: auto;
+	bottom: calc(100% + 6px);
+}
+
+.rowdy-crowd-dropdown--end .rowdy-crowd-dropdown__menu {
+	right: 0;
+	left: auto;
+}
+
+.rowdy-crowd-dropdown .rowdy-crowd-dropdown__option {
+	display: block;
+	padding: 0.5em 0.8em;
+	border-radius: 8px;
+	color: var(--rowdy-crowd-dropdown-menu-color);
+	text-decoration: none;
+	white-space: nowrap;
+}
+
+.rowdy-crowd-dropdown .rowdy-crowd-dropdown__option:hover,
+.rowdy-crowd-dropdown .rowdy-crowd-dropdown__option:focus-visible {
+	background: var(--rowdy-crowd-dropdown-menu-hover);
+	color: var(--rowdy-crowd-dropdown-menu-color);
+}
+
+.rowdy-crowd-dropdown__option[aria-current="true"] {
+	font-weight: 700;
+}

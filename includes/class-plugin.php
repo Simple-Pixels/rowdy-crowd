@@ -18,8 +18,8 @@ final class Plugin {
 	 * Module classes to load, in order. Add new modules here.
 	 */
 	private const MODULES = array(
-		\RowdyCrowd\Modules\Hello_World\Module::class,
 		\RowdyCrowd\Modules\Geolocation\Module::class,
+		\RowdyCrowd\Modules\Currency\Module::class,
 	);
 
 	private static ?Plugin $instance = null;

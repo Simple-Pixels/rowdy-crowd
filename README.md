@@ -5,7 +5,7 @@
 | | |
 | --- | --- |
 | Type | Site-specific (Rowdy Crowd, `rowdycrowd.com.au` / `rowdycrowd.com`) |
-| Version | 0.2.0 (`ROWDY_CROWD_VERSION` + plugin header) |
+| Version | 0.3.0 (`ROWDY_CROWD_VERSION` + plugin header) |
 | Main file | `rowdy-crowd.php` |
 | Text domain | `rowdy-crowd` |
 | Prefix | `RowdyCrowd\` (namespaces), `rowdy_crowd_` (hooks, options, meta), `ROWDY_CROWD_` (constants), `rowdy-crowd-` (handles, CSS) |
@@ -17,8 +17,8 @@ Rowdy Crowd is moving from two Shopify stores (AU and US) to one WooCommerce sit
 
 | Module | Status | What it does |
 | --- | --- | --- |
-| [geolocation](modules/geolocation/) | In progress | AU/US regions by domain, `aunz`/`usa` visibility classes, first-visit geo redirect, `[region_switcher]`. |
-| [hello-world](modules/hello-world/) | Placeholder | Admin notice and `[rowdy_crowd_hello]` confirming the plugin is deployed. Remove once real modules are live. |
+| [geolocation](modules/geolocation/) | In progress | AU/US regions by domain, `aunz`/`usa` visibility classes, first-visit geo redirect, `[region_switcher]` (also switches currency). |
+| [currency](modules/currency/) | In progress | `[currency_switcher]` for WooPayments Multi-Currency (AUD, EUR, NZD, GBP, USD). |
 
 Each module has its own README with settings, hooks and files.
 
@@ -29,14 +29,14 @@ Each module has its own README with settings, hooks and files.
 | WordPress | 6.4+ |
 | PHP | 8.1+ |
 | Required plugins | None for the core. WooCommerce-dependent modules gate themselves with `is_enabled()`. |
-| Optional plugins | WooCommerce, Elementor / Elementor Pro (the site's page builder). |
+| Optional plugins | WooCommerce, Elementor / Elementor Pro (the site's page builder), WooPayments with Multi-Currency (needed for the currency switcher and region → currency switching). |
 | Hosting | **Kinsta**: full-page cache and IP geolocation (MyKinsta → Tools → Geolocation). Both domains on the same site. |
 
 ## Installation
 
 1. Deploys are automatic: every merge into `main` runs `.github/workflows/deploy.yml`, which rsyncs the repo to `wp-content/plugins/rowdy-crowd/` on the live Kinsta site. It can also be run manually from the Actions tab. Dev-only files (`CLAUDE.md`, READMEs, `.git*`) are excluded.
 2. Activate **Rowdy Crowd** (first install only).
-3. Administrators should see a green "Hello World from Rowdy Crowd" notice, which confirms the deployment.
+3. The plugin has no visible output on its own. Check the version shown on the Plugins screen matches the Changelog below.
 4. Follow each module's README for its setup (e.g. [geolocation hosting setup](modules/geolocation/README.md#hosting-setup-kinsta)).
 
 ## Configuration
@@ -47,8 +47,10 @@ There is no plugin-wide settings page. Configuration is per module (see each mod
 
 | Shortcode | Module |
 | --- | --- |
-| `[region_switcher show_label="yes"]` | geolocation |
-| `[rowdy_crowd_hello]` | hello-world |
+| `[region_switcher]` | geolocation (switches region and currency) |
+| `[currency_switcher]` | currency |
+
+Both render the shared dropdown: transparent background, white border, no flags.
 
 CSS classes `aunz` / `usa` on any element (Elementor: Advanced → CSS Classes) limit it to one region.
 
@@ -74,7 +76,7 @@ Autoloading follows WordPress file naming: `RowdyCrowd\Core\Foo_Bar` → `includ
 
 ### Front end
 
-Core loads no assets. Modules enqueue their own (e.g. geolocation prints an inline redirect script and switcher CSS/JS).
+Core loads the shared dropdown CSS/JS from `assets/` (used by both switchers). Modules enqueue their own assets (e.g. geolocation prints an inline redirect script).
 
 ## File structure
 
@@ -83,7 +85,8 @@ rowdy-crowd.php              Plugin header, global constants, bootstrap
 includes/                    Core (RowdyCrowd\Core): Autoloader, Plugin, abstract Module   → includes/README.md
 modules/                     One folder per feature                                      → modules/README.md
   geolocation/               AU/US regions, redirect, switcher                            → modules/geolocation/README.md
-  hello-world/               Deployment check placeholder                                 → modules/hello-world/README.md
+  currency/                  [currency_switcher] for WooPayments Multi-Currency           → modules/currency/README.md
+assets/                      Shared front-end files (dropdown CSS/JS)
 .github/workflows/deploy.yml GitHub Actions deploy to Kinsta (on push to main)
 CLAUDE.md                    Project context, coding standards, git workflow
 ```
@@ -103,10 +106,10 @@ Module hooks are listed in each module's README (e.g. `rowdy_crowd_region`, `row
 - **Two domains, one install.** Carts and logins don't carry across `.com` and `.com.au`. Content saved with absolute URLs keeps the domain it was created on.
 - **Every new module must be registered** in `Plugin::MODULES` and listed in `modules/README.md`, or it won't load.
 - **WooCommerce-dependent modules must return false from `is_enabled()`** when Woo isn't active, so the plugin never fatals.
-- **PHP isn't installed locally**, so code can't be linted or run before deploying. Test on staging.
+- **Lint PHP before pushing: merging to `main` deploys to live.** PHP 8.4 comes with Laravel Herd (`~/.config/herd/bin/php84/php.exe -l <file>`). WordPress isn't installed locally, so test behaviour on staging.
 - **Merging into `main` deploys to live**, and the deploy uses `rsync --delete`. Never edit plugin files on the server, and add any new dev-only files to the workflow's `--exclude` list.
 - **WP Rocket also caches pages.** Clear it after deploys that change front-end output.
-- Remove the hello-world module before launch.
+- **Currency is per visitor, pages are cached.** The currency switcher's label is rendered on the server, so test it with caching on (Kinsta and WP Rocket). See [modules/currency/README.md](modules/currency/README.md#caching).
 
 ## Development
 
@@ -119,5 +122,6 @@ Module hooks are listed in each module's README (e.g. `rowdy_crowd_region`, `row
 
 | Version | Notes |
 | --- | --- |
+| 0.3.0 | Currency module with `[currency_switcher]`. `[region_switcher]` now also switches currency (AUD/USD). Both switchers share one dropdown: no flags, transparent background, white border. Hello World module removed. |
 | 0.2.0 | Geolocation module (AU/US regions, redirect, switcher). |
 | 0.1.0 | Base plugin: autoloader, module system, hello-world module. |

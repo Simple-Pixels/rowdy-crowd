@@ -36,22 +36,18 @@ Kinsta serves cached pages without running PHP, so the redirect happens in the b
    - US, Canada or Mexico → `usa`
    - anything else, or unknown → `aunz`
 
-   The result is saved in the cookie. If it doesn't match the current domain, the visitor is redirected to the same path on the other domain.
+   The result is saved in the cookie. If it doesn't match the current domain, the visitor is redirected to the same path on the other domain, with the region's currency in the URL so prices switch too. (The returning-visitor redirect in step 2 leaves the currency alone.)
 4. **Search engine bots are never redirected.** Otherwise Googlebot, which crawls from the US, could never index the AU site.
 
 If the lookup fails or times out, the page simply shows. Visitors with JavaScript off aren't redirected.
 
 ## Region switcher
 
-`[region_switcher]` renders a dropdown with a flag and the region name. It normally goes in the header.
+`[region_switcher]` renders a dropdown with the current region's name. It normally goes in the header. It takes no attributes and has no flags.
 
-| Attribute | Default | Description |
-| --- | --- | --- |
-| `show_label` | `yes` | `no` shows only the flag on the toggle. |
+**Switching region also switches currency:** Australia → AUD, United States → USD. Each option links to the current page on that region's domain with `?rc_region=<region>&currency=<code>`. The receiving domain saves the region in its cookie, WooPayments Multi-Currency saves the currency (see the [currency module](../currency/README.md)), and the visitor is redirected to the clean URL. The links work without JavaScript; JS only opens and closes the dropdown.
 
-Each option links to the current page on the other region's domain with `?rc_region=<region>`. The receiving domain saves the choice in its cookie and redirects to the clean URL. The links work without JavaScript; JS only opens and closes the dropdown.
-
-Restyle it by overriding the CSS custom properties on `.rowdy-crowd-region-switcher` (`--rowdy-crowd-switcher-bg`, `-color`, `-hover`, `-radius`).
+The look comes from the shared dropdown (`assets/dropdown.css`): transparent background, white border, white text. Override the custom properties on `.rowdy-crowd-region-switcher` to restyle it (`--rowdy-crowd-dropdown-color`, `-border`, `-hover`, `-menu-bg`, `-menu-color`, `-menu-hover`).
 
 ## Multi-domain URLs
 
@@ -77,6 +73,7 @@ For testing on staging, add `define( 'ROWDY_CROWD_TEST_COUNTRY', 'US' );` to `wp
 | --- | --- | --- |
 | `rowdy_crowd_region` | filter | Region for the current request. |
 | `rowdy_crowd_region_domains` | filter | Region → domain map. Add staging domains here, e.g. `array( 'aunz' => 'stg-au.example.com', 'usa' => 'stg-us.example.com' )`. |
+| `rowdy_crowd_region_currencies` | filter | Region → currency code switched to when the region changes. Default `aunz` → `AUD`, `usa` → `USD`. |
 | `rowdy_crowd_usa_countries` | filter | Countries routed to `usa`. Default `US`, `CA`, `MX`. |
 | `rowdy_crowd_visitor_country` | filter | Detected visitor country code. |
 
@@ -85,9 +82,9 @@ For testing on staging, add `define( 'ROWDY_CROWD_TEST_COUNTRY', 'US' );` to `wp
 | File | Purpose |
 | --- | --- |
 | `class-module.php` | Hooks: URL filtering, body class, `?rc_region=` handling, head CSS/script, hreflang. |
-| `class-region.php` | Region logic: domain map, current region, cookie, country → region, cross-region URLs. |
+| `class-region.php` | Region logic: domain map, current region, cookie, country → region, region → currency, cross-region URLs. |
 | `class-rest-controller.php` | `GET /wp-json/rowdy-crowd/v1/region` endpoint. |
 | `class-switcher.php` | `[region_switcher]` shortcode. |
 | `assets/redirect.js` | First-visit redirect, printed inline in `<head>`. |
-| `assets/switcher.js` / `switcher.css` | Dropdown behaviour and styles. |
-| `assets/flags/` | `aunz.svg`, `usa.svg` flag images. |
+
+The switcher's markup, CSS and JS are the shared dropdown (`includes/class-dropdown.php`, `assets/dropdown.*`).

@@ -59,6 +59,17 @@ Built in `modules/geolocation/`. See its README for details.
 - Known limitation: carts and logins don't carry across the two domains.
 - Other modules needing the region (e.g. AU/US pricing) should call `RowdyCrowd\Modules\Geolocation\Region::current()`.
 
+### Currency and the switchers (spec, Nov 2026)
+
+Built in `modules/currency/` plus the region switcher in `modules/geolocation/`. See their READMEs.
+
+- Pricing is done by **WooPayments Multi-Currency** (set up by the client). Enabled currencies: **AUD (store currency), EUR, NZD, GBP, USD**. Switching works through WooPayments' `?currency=XXX` query var; we rely on that rather than its internals. The only code that calls WooPayments is `Currencies` in the currency module.
+- **`[region_switcher]` also switches currency**: Australia → AUD, United States → USD (`Region::currencies()`, filter `rowdy_crowd_region_currencies`). The currency is added to the region links and the first-visit geo redirect.
+- **`[currency_switcher]`** is for the footer and lists every currency enabled in WooPayments. It doesn't change region.
+- Both switchers use the **shared `Dropdown`** (`includes/class-dropdown.php`, root `assets/dropdown.*`): **no flags, transparent background, white border**. Reuse it for any new dropdown rather than writing a new one.
+- The Hello World placeholder module was removed in 0.3.0.
+- Open question: first-time visitors who haven't chosen a currency. The plan is to rely on WooPayments' "automatically switch currency based on location" setting. Cached pages may also show a stale currency label. Both need testing on live.
+
 ### Homepage (approved wireframe)
 
 Top bar (geolocation/shipping notice), header nav (Shop Our Range, Custom Printing, For Businesses, Event Categories, Our Story, Shop Online CTA), hero ("SUSTAIN-able"), product category tiles (Wine Tumblers, Champagne Flutes, Gin Balloons, Beer Schooners, Accessories), "Make it your own" and "Business and wholesale" panels, USP icons (dishwasher safe, 100% recyclable, unbreakable, reusable), video plus "three easy steps" custom-order explainer, press logos, event category tiles (Wineries/Distilleries/Venues, Community and Corporate Events, Weddings, Party and Catering Packs, Family Packs and Gifting), reviews carousel, About section, featured bundles carousel, "reUSE-able" banner, newsroom, #gettingrowdycrowd social feed, newsletter signup, footer.
@@ -67,7 +78,8 @@ Top bar (geolocation/shipping notice), header nav (Shop Our Range, Custom Printi
 
 ```
 rowdy-crowd.php           Plugin header, global constants, bootstrap
-includes/                 Core (RowdyCrowd\Core): Autoloader, Plugin, abstract Module
+includes/                 Core (RowdyCrowd\Core): Autoloader, Plugin, abstract Module, Dropdown
+assets/                   Shared front-end files used by core classes (dropdown CSS/JS)
 modules/<module-id>/      One folder per feature (RowdyCrowd\Modules\<Module_Id>)
   class-module.php        Module entry class extending RowdyCrowd\Core\Module
   README.md               Required: what the module does, hooks, settings, files
@@ -112,7 +124,7 @@ modules/<module-id>/      One folder per feature (RowdyCrowd\Modules\<Module_Id>
 
 ## Environment notes
 
-- PHP isn't installed on the local dev machine, so code can't be linted or run locally. Test on the deployed site.
+- **PHP 8.4 is available through Laravel Herd**: `/c/Users/zacmo/.config/herd/bin/php84/php.exe` (it isn't on the bash PATH as `php`). **Always run `php -l` on every changed PHP file before pushing**, because merging to `main` deploys to live. WordPress isn't installed locally. To go beyond a syntax check, boot the plugin in a throwaway script with stubbed WordPress and WooPayments functions (keep it outside the repo) and print what the shortcodes return.
 - Hosting is **Kinsta** (server page cache, IP geolocation via MyKinsta → Tools). Assume pages are cached. Per-visitor logic must not depend on PHP running for every page view; use the domain, an uncached REST endpoint, or client-side JS.
 - The site is built with **Elementor and Elementor Pro**. Custom classes go in Advanced → CSS Classes; the editor preview loads with `?elementor-preview`.
 - Other plugins on live (Oct 2026): WooCommerce, WooCommerce Payments, ACF Pro, WP Rocket, Rank Math, WP Offload Media (amazon-s3-and-cloudfront-pro), Imagify, Members, WP Mail SMTP, MonsterInsights, Duplicate Post, Disable Comments, Classic Editor, Migrate Guru, WP Pusher.

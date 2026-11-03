@@ -36,7 +36,7 @@ final class Module extends Base_Module {
 		add_action( 'wp_head', array( $this, 'print_hreflang_links' ) );
 		add_action( 'rest_api_init', array( new Rest_Controller(), 'register_routes' ) );
 
-		( new Switcher( $this->url( 'assets/' ) ) )->register();
+		( new Switcher() )->register();
 	}
 
 	/**
@@ -120,13 +120,15 @@ final class Module extends Base_Module {
 		}
 
 		$config = array(
-			'region'   => Region::current(),
-			'regions'  => array_keys( Region::all() ),
-			'domains'  => Region::domains(),
-			'cookie'   => Region::COOKIE,
-			'queryVar' => Region::QUERY_VAR,
-			'endpoint' => rest_url( Rest_Controller::ROUTE_NAMESPACE . '/region' ),
-			'timeout'  => self::REDIRECT_TIMEOUT_MS,
+			'region'      => Region::current(),
+			'regions'     => array_keys( Region::all() ),
+			'domains'     => Region::domains(),
+			'cookie'      => Region::COOKIE,
+			'queryVar'    => Region::QUERY_VAR,
+			'currencyVar' => Region::CURRENCY_QUERY_VAR,
+			'currencies'  => Region::currencies(),
+			'endpoint'    => rest_url( Rest_Controller::ROUTE_NAMESPACE . '/region' ),
+			'timeout'     => self::REDIRECT_TIMEOUT_MS,
 		);
 
 		$script = file_get_contents( $this->path( 'assets/redirect.js' ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Local file.
