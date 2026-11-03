@@ -12,6 +12,7 @@ A store locator for Rowdy Crowd's stockists: a **Stockists** post type in wp-adm
 
 ## Setup
 
+0. After the plugin is deployed, open any wp-admin page as an administrator. That saves the **Stockist details** field group to ACF (check ACF → Field Groups), which is what lets WP All Import see the fields.
 1. **Stockists → Settings**: paste the API key (and Map ID, and change the pin colour if wanted) and save. This also gives ACF the key, so the address search works on the stockist screen.
    - Alternatively set `define( 'ROWDY_CROWD_GOOGLE_MAPS_API_KEY', '…' );` in `wp-config.php`. It takes priority and keeps the key out of the database.
 2. **Stockists → Add new**: add the stores (below).
@@ -68,8 +69,18 @@ The region comes from the domain, so cached pages stay correct per site (see the
 | Thing | Stored as |
 | --- | --- |
 | Stores | `rc_stockist` posts (not public: no pages of their own) |
-| Fields | ACF fields registered in code (`group_rowdy_crowd_stockist`), meta keys `rowdy_crowd_location`, `rowdy_crowd_address`, `rowdy_crowd_phone`, `rowdy_crowd_website`, `rowdy_crowd_region` |
+| Fields | An ACF field group, **"Stockist details"** (`group_rowdy_crowd_stockist`), saved in ACF's database and visible under ACF → Field Groups. Meta keys `rowdy_crowd_location`, `rowdy_crowd_address`, `rowdy_crowd_phone`, `rowdy_crowd_website`, `rowdy_crowd_region`. See "How the fields are saved". |
+| Field group version | `rowdy_crowd_stockist_fields_version` option |
 | Settings | `rowdy_crowd_store_finder` option (`api_key`, `map_id`, `pin_color`) |
+
+### How the fields are saved
+
+The fields are defined in code (`class-stockist-fields.php`) **and saved to ACF's database** as a normal field group. Tools that read ACF's database, such as the **WP All Import ACF add-on**, can't see a group that exists only in PHP, so it has to be in the database.
+
+- The first time an **administrator** opens any wp-admin page after the plugin is deployed, the group is saved. Until someone does, WP All Import won't list the fields.
+- If the group is ever deleted, the next administrator page load saves it again.
+- The group is updated in place (never duplicated) when `Stockist_Fields::VERSION` is bumped. A developer bumps it whenever the definition changes.
+- **Don't edit "Stockist details" on the ACF screen.** Edits are overwritten the next time the definition changes. Ask for the change to be made in the code instead.
 
 `rowdy_crowd_location` is ACF's serialised Google Map value (`address`, `lat`, `lng`, `street_number`, `street_name`, `city`, `state`, `state_short`, `post_code`, …). Anything that imports stockists must write that format.
 
@@ -93,7 +104,7 @@ None yet. Region helpers come from the geolocation module (`Region::current()`).
 | --- | --- |
 | `class-module.php` | Registers the parts below. |
 | `class-stockist-post-type.php` | The Stockists post type, store-name placeholder and admin list columns. |
-| `class-stockist-fields.php` | The ACF field group. |
+| `class-stockist-fields.php` | The ACF field group definition, and saving it to ACF's database. |
 | `class-stockist.php` | One store: reads the fields, formats address, phone, website, directions link and search text. |
 | `class-stockists.php` | Queries stores by region; lists the states for the filter. |
 | `class-settings.php` | Stockists → Settings (API key, Map ID, pin colour) and the key constant. |
