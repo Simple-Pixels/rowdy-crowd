@@ -4,8 +4,10 @@
  * Colours are Rowdy Crowd's brand palette. Pink, teal, orange and lime are too light to use as
  * text on white, so they're used as fills and tints (with near-black text); links and focus
  * rings use blue, and body text uses the brand's dark ink. All of those pass WCAG AA.
- * One exception, at the client's request: "Stores near me" is white on brand orange. That
- * is 2.96:1, a little under the 3:1 minimum for large text, so it's bold and full size.
+ * Two exceptions, at the client's request, both white on a brand colour: "Stores near me"
+ * (orange, 2.96:1) and the chosen state chip (pink 3.68:1, orange 2.96:1, teal 2.40:1,
+ * lime 2.01:1; blue and ink pass). They are bold, but under the 3:1 minimum for large text
+ * for orange, teal and lime.
  *
  * --rowdy-crowd-store-finder-height is set inline from the shortcode's height attribute.
  */
@@ -183,32 +185,26 @@
 
 .rowdy-crowd-store-finder__chip--all {
 	--chip: var(--rowdy-crowd-ink);
-	--chip-on: #fff;
 }
 
 .rowdy-crowd-store-finder__chip--pink {
 	--chip: var(--rowdy-crowd-pink);
-	--chip-on: var(--rowdy-crowd-on-colour);
 }
 
 .rowdy-crowd-store-finder__chip--teal {
 	--chip: var(--rowdy-crowd-teal);
-	--chip-on: var(--rowdy-crowd-on-colour);
 }
 
 .rowdy-crowd-store-finder__chip--orange {
 	--chip: var(--rowdy-crowd-orange);
-	--chip-on: var(--rowdy-crowd-on-colour);
 }
 
 .rowdy-crowd-store-finder__chip--lime {
 	--chip: var(--rowdy-crowd-lime);
-	--chip-on: var(--rowdy-crowd-on-colour);
 }
 
 .rowdy-crowd-store-finder__chip--blue {
 	--chip: var(--rowdy-crowd-blue);
-	--chip-on: #fff;
 }
 
 .rowdy-crowd-store-finder .rowdy-crowd-store-finder__chip,
@@ -234,14 +230,9 @@
 .rowdy-crowd-store-finder .rowdy-crowd-store-finder__chip[aria-pressed="true"],
 .rowdy-crowd-store-finder .rowdy-crowd-store-finder__chip[aria-pressed="true"]:is(:hover, :focus, :active) {
 	background: var(--chip, var(--rowdy-crowd-ink));
-	color: var(--chip-on, #fff);
+	color: #fff; /* White on every colour, at the client's request (see the contrast note at the top). */
 }
 
-/* A tick as well as the fill, so the chosen chip isn't shown by colour alone. */
-.rowdy-crowd-store-finder__chip[aria-pressed="true"]::before {
-	content: "\2713";
-	font-weight: 700;
-}
 
 .rowdy-crowd-store-finder__chip-count {
 	font-size: 0.85em;
@@ -249,32 +240,76 @@
 	opacity: 0.8;
 }
 
-.rowdy-crowd-store-finder__status {
+/* The chips on the left, the store count on the right. */
+.rowdy-crowd-store-finder__filter-row {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
+	justify-content: space-between;
 	gap: 0.5rem 1rem;
 }
 
 .rowdy-crowd-store-finder__count {
-	margin: 0;
+	flex: 0 0 auto;
+	margin: 0 0 0 auto;
 	font-size: 0.9em;
 	font-weight: 600;
+	white-space: nowrap;
 	opacity: 0.8;
 }
 
+/*
+ * Toast for "Stores near me": bottom centre of the screen. The script moves it to <body>, so
+ * a transformed Elementor section can't pin it to the wrong box. That also takes it outside
+ * the finder, so it can't use the finder's custom properties or its [hidden] rule.
+ */
 .rowdy-crowd-store-finder__message {
+	position: fixed;
+	bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+	left: 50%;
+	z-index: 100000;
+	box-sizing: border-box;
+	width: max-content;
+	max-width: min(92vw, 520px);
 	margin: 0;
-	padding: 0.4em 0.9em;
-	border-left: 4px solid var(--rowdy-crowd-teal);
-	border-radius: 8px;
-	background: rgba(0, 187, 180, 0.12);
-	font-size: 0.9em;
+	padding: 0.75em 1.25em;
+	border-left: 5px solid #00bbb4;
+	border-radius: 12px;
+	background: #403a35;
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+	color: #fff;
+	font-size: 0.95rem;
+	font-weight: 600;
+	line-height: 1.4;
+	text-align: left;
+	transform: translateX(-50%);
+	animation: rowdy-crowd-store-finder-toast-in 0.2s ease-out;
+}
+
+.rowdy-crowd-store-finder__message[hidden] {
+	display: none;
 }
 
 .rowdy-crowd-store-finder__message.is-error {
-	border-left-color: var(--rowdy-crowd-orange);
-	background: rgba(255, 100, 24, 0.12);
+	border-left-color: #ff6418;
+}
+
+@keyframes rowdy-crowd-store-finder-toast-in {
+	from {
+		opacity: 0;
+		transform: translate(-50%, 12px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translate(-50%, 0);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.rowdy-crowd-store-finder__message {
+		animation: none;
+	}
 }
 
 /* List and map */
@@ -531,6 +566,16 @@
 
 	.rowdy-crowd-store-finder__list {
 		max-height: 60vh;
+	}
+
+	/* The chips scroll sideways, so the count sits under them instead of beside them. */
+	.rowdy-crowd-store-finder__filter-row {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.rowdy-crowd-store-finder__count {
+		margin-left: 0;
 	}
 
 	/* One scrolling row of chips instead of a tall wrapped block. */
