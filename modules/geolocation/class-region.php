@@ -32,6 +32,11 @@ final class Region {
 	 */
 	public const QUERY_VAR = 'rc_region';
 
+	/**
+	 * Query var WooPayments Multi-Currency uses to switch currency, e.g. ?currency=USD.
+	 */
+	public const CURRENCY_QUERY_VAR = 'currency';
+
 	private const DOMAINS = array(
 		self::AUNZ => 'rowdycrowd.com.au',
 		self::USA  => 'rowdycrowd.com',
@@ -45,6 +50,11 @@ final class Region {
 	private const HREFLANG = array(
 		self::AUNZ => 'en-AU',
 		self::USA  => 'en-US',
+	);
+
+	private const CURRENCIES = array(
+		self::AUNZ => 'AUD',
+		self::USA  => 'USD',
 	);
 
 	/**
@@ -84,6 +94,29 @@ final class Region {
 	 */
 	public static function hreflang( string $region ): string {
 		return self::HREFLANG[ $region ] ?? '';
+	}
+
+	/**
+	 * Region => currency code map. The codes must be enabled in WooPayments Multi-Currency.
+	 *
+	 * @return array<string, string>
+	 */
+	public static function currencies(): array {
+		/**
+		 * Filters the currency each region switches to.
+		 *
+		 * @param array<string, string> $currencies Region key => ISO 4217 currency code.
+		 */
+		return apply_filters( 'rowdy_crowd_region_currencies', self::CURRENCIES );
+	}
+
+	/**
+	 * Currency code a region switches to, or '' if it has none.
+	 *
+	 * @param string $region Region key.
+	 */
+	public static function currency( string $region ): string {
+		return self::currencies()[ $region ] ?? '';
 	}
 
 	/**
@@ -215,14 +248,15 @@ final class Region {
 	 * URL of the current page in another region.
 	 *
 	 * On mapped domains this points at the region's domain. Elsewhere it stays on the
-	 * current host. With $with_choice the URL carries ?rc_region= so the choice is saved.
+	 * current host. With $with_choice the URL carries ?rc_region= so the choice is saved,
+	 * plus ?currency= so WooPayments switches to the region's currency.
 	 *
 	 * @param string $region      Region key.
-	 * @param bool   $with_choice Whether to add the region query var.
+	 * @param bool   $with_choice Whether to add the region and currency query vars.
 	 */
 	public static function url_for( string $region, bool $with_choice = true ): string {
 		$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '/';
-		$request_uri = remove_query_arg( self::QUERY_VAR, $request_uri );
+		$request_uri = remove_query_arg( array( self::QUERY_VAR, self::CURRENCY_QUERY_VAR ), $request_uri );
 		$domains     = self::domains();
 
 		if ( null !== self::host_region() && isset( $domains[ $region ] ) ) {
@@ -231,6 +265,17 @@ final class Region {
 			$url = home_url( $request_uri );
 		}
 
-		return $with_choice ? add_query_arg( self::QUERY_VAR, $region, $url ) : $url;
+		if ( ! $with_choice ) {
+			return $url;
+		}
+
+		$args     = array( self::QUERY_VAR => $region );
+		$currency = self::currency( $region );
+
+		if ( '' !== $currency ) {
+			$args[ self::CURRENCY_QUERY_VAR ] = $currency;
+		}
+
+		return add_query_arg( $args, $url );
 	}
 }

@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
  * Maps plugin classes to files using WordPress file naming conventions.
  *
  * RowdyCrowd\Core\Plugin                 => includes/class-plugin.php
- * RowdyCrowd\Modules\Hello_World\Module  => modules/hello-world/class-module.php
+ * RowdyCrowd\Modules\Geolocation\Module  => modules/geolocation/class-module.php
  */
 final class Autoloader {
 
@@ -62,7 +62,7 @@ final class Autoloader {
 	}
 
 	/**
-	 * Converts a class or namespace segment to a file slug (Hello_World => hello-world).
+	 * Converts a class or namespace segment to a file slug (Region_Switcher => region-switcher).
 	 *
 	 * @param string $name Class or namespace segment.
 	 */

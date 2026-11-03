@@ -16,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
 abstract class Module {
 
 	/**
-	 * Unique module ID, e.g. 'hello-world'. Matches the module's folder name.
+	 * Unique module ID, e.g. 'geolocation'. Matches the module's folder name.
 	 */
 	abstract public function get_id(): string;
 

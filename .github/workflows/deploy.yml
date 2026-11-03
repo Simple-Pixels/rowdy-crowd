@@ -3,13 +3,19 @@ name: Deploy to Kinsta
 on:
   push:
     branches: [main]
+  workflow_dispatch:
+
+# Never run two deploys at once; a newer push waits for the current one.
+concurrency:
+  group: deploy-kinsta
+  cancel-in-progress: false
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up SSH
         run: |
@@ -18,13 +24,17 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -p ${{ secrets.KINSTA_SSH_PORT }} ${{ secrets.KINSTA_SSH_HOST }} >> ~/.ssh/known_hosts
 
+      # Development-only files stay out of the public plugin folder.
       - name: Deploy via rsync
         run: |
           rsync -avz --delete \
             -e "ssh -i ~/.ssh/deploy_key -p ${{ secrets.KINSTA_SSH_PORT }}" \
             --exclude ".git" \
             --exclude ".github" \
+            --exclude ".claude" \
             --exclude ".gitignore" \
+            --exclude ".gitattributes" \
+            --exclude "CLAUDE.md" \
             --exclude "README.md" \
             --exclude "node_modules" \
             --exclude ".env" \

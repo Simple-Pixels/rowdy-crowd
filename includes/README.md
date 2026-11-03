@@ -7,6 +7,9 @@ Shared plugin infrastructure. Namespace: `RowdyCrowd\Core`.
 | `class-autoloader.php` | `Autoloader` | Maps `RowdyCrowd\Core\*` to `includes/` and `RowdyCrowd\Modules\*` to `modules/`, using WordPress `class-*.php` file names. |
 | `class-plugin.php` | `Plugin` | Singleton. Boots on `plugins_loaded`, instantiates and registers each module in `Plugin::MODULES`. |
 | `class-module.php` | `Module` | Abstract base for all modules. Provides `get_id()`, `register()`, `is_enabled()`, and `path()` / `url()` helpers. |
+| `class-dropdown.php` | `Dropdown` | Shared dropdown used by `[region_switcher]` and `[currency_switcher]`: `Dropdown::render()` returns the markup, `Dropdown::register()` loads `assets/dropdown.css` and `assets/dropdown.js`. Modules that render a dropdown call `register()` and reuse it instead of writing their own. |
+
+Shared front-end files used by core classes live in the plugin's root `assets/` folder. Module-specific assets stay in the module's own `assets/` folder.
 
 ## Global constants
 

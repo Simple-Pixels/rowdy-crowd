@@ -59,6 +59,17 @@ Built in `modules/geolocation/`. See its README for details.
 - Known limitation: carts and logins don't carry across the two domains.
 - Other modules needing the region (e.g. AU/US pricing) should call `RowdyCrowd\Modules\Geolocation\Region::current()`.
 
+### Currency and the switchers (spec, Nov 2026)
+
+Built in `modules/currency/` plus the region switcher in `modules/geolocation/`. See their READMEs.
+
+- Pricing is done by **WooPayments Multi-Currency** (set up by the client). Enabled currencies: **AUD (store currency), EUR, NZD, GBP, USD**. Switching works through WooPayments' `?currency=XXX` query var; we rely on that rather than its internals. The only code that calls WooPayments is `Currencies` in the currency module.
+- **`[region_switcher]` also switches currency**: Australia → AUD, United States → USD (`Region::currencies()`, filter `rowdy_crowd_region_currencies`). The currency is added to the region links and the first-visit geo redirect.
+- **`[currency_switcher]`** is for the footer and lists every currency enabled in WooPayments. It doesn't change region.
+- Both switchers use the **shared `Dropdown`** (`includes/class-dropdown.php`, root `assets/dropdown.*`): **no flags, transparent background, white border**. Reuse it for any new dropdown rather than writing a new one.
+- The Hello World placeholder module was removed in 0.3.0.
+- Open question: first-time visitors who haven't chosen a currency. The plan is to rely on WooPayments' "automatically switch currency based on location" setting. Cached pages may also show a stale currency label. Both need testing on live.
+
 ### Homepage (approved wireframe)
 
 Top bar (geolocation/shipping notice), header nav (Shop Our Range, Custom Printing, For Businesses, Event Categories, Our Story, Shop Online CTA), hero ("SUSTAIN-able"), product category tiles (Wine Tumblers, Champagne Flutes, Gin Balloons, Beer Schooners, Accessories), "Make it your own" and "Business and wholesale" panels, USP icons (dishwasher safe, 100% recyclable, unbreakable, reusable), video plus "three easy steps" custom-order explainer, press logos, event category tiles (Wineries/Distilleries/Venues, Community and Corporate Events, Weddings, Party and Catering Packs, Family Packs and Gifting), reviews carousel, About section, featured bundles carousel, "reUSE-able" banner, newsroom, #gettingrowdycrowd social feed, newsletter signup, footer.
@@ -67,7 +78,8 @@ Top bar (geolocation/shipping notice), header nav (Shop Our Range, Custom Printi
 
 ```
 rowdy-crowd.php           Plugin header, global constants, bootstrap
-includes/                 Core (RowdyCrowd\Core): Autoloader, Plugin, abstract Module
+includes/                 Core (RowdyCrowd\Core): Autoloader, Plugin, abstract Module, Dropdown
+assets/                   Shared front-end files used by core classes (dropdown CSS/JS)
 modules/<module-id>/      One folder per feature (RowdyCrowd\Modules\<Module_Id>)
   class-module.php        Module entry class extending RowdyCrowd\Core\Module
   README.md               Required: what the module does, hooks, settings, files
@@ -97,12 +109,24 @@ modules/<module-id>/      One folder per feature (RowdyCrowd\Modules\<Module_Id>
 
 ## Git workflow
 
-- **Never push directly to `main`.** Always work on a new branch, push it, and open a PR into `main`.
+- **Never push directly to `main`.** Always work on a new branch, push it, and open a PR into `main`. The one approved exception is the `Simple-Pixels/kinsta-deploy-setup` tool, which commits `.github/workflows/deploy.yml` straight to `main` when it is (re)run.
 - **Do not add "Co-Authored-By: Claude" or any Claude/AI attribution** to commit messages or PR descriptions.
 - Branch names: `feature/<short-description>`, `fix/<short-description>`.
 
+## Deployment
+
+- **Every push to `main` (i.e. every merged PR) deploys to the live Kinsta site** through GitHub Actions (`.github/workflows/deploy.yml`). It can also be run manually from the Actions tab ("Run workflow").
+- The workflow rsyncs the repo to `/www/rowdycrowd_579/public/wp-content/plugins/rowdy-crowd/` with `--delete`. Anything in that folder that isn't in the repo is removed, so never edit plugin files on the server.
+- Development-only files (`CLAUDE.md`, `README.md` files, `.git*`, `.github`, `.claude`) are excluded from the deploy. Add new dev-only files to the `--exclude` list so they don't become publicly readable.
+- Connection details live in the repo's Actions secrets: `KINSTA_SSH_HOST`, `KINSTA_SSH_PORT`, `KINSTA_SSH_USER`, `KINSTA_SSH_KEY`, `KINSTA_DEPLOY_PATH`. The deploy key (no passphrase) is `~/.ssh/kinsta-deploy-Simple-Pixels-rowdy-crowd` on the machine that ran the setup.
+- Set up with `Simple-Pixels/kinsta-deploy-setup`. It needed local fixes (Kinsta company ID, an SSH key passphrase bug under PowerShell 7, and a wrong guessed path) that aren't in that repo yet.
+- Live is a production site, so test risky changes on staging first.
+
 ## Environment notes
 
-- PHP isn't installed on the local dev machine, so code can't be linted or run locally. Test on the deployed site.
+- **PHP 8.4 is available through Laravel Herd**: `/c/Users/zacmo/.config/herd/bin/php84/php.exe` (it isn't on the bash PATH as `php`). **Always run `php -l` on every changed PHP file before pushing**, because merging to `main` deploys to live. WordPress isn't installed locally. To go beyond a syntax check, boot the plugin in a throwaway script with stubbed WordPress and WooPayments functions (keep it outside the repo) and print what the shortcodes return.
 - Hosting is **Kinsta** (server page cache, IP geolocation via MyKinsta → Tools). Assume pages are cached. Per-visitor logic must not depend on PHP running for every page view; use the domain, an uncached REST endpoint, or client-side JS.
-- Page builder not yet confirmed. The geolocation module assumes **Elementor** may be used (Advanced → CSS Classes; editor preview loads with `?elementor-preview`). Update this once confirmed.
+- The site is built with **Elementor and Elementor Pro**. Custom classes go in Advanced → CSS Classes; the editor preview loads with `?elementor-preview`.
+- Other plugins on live (Oct 2026): WooCommerce, WooCommerce Payments, ACF Pro, WP Rocket, Rank Math, WP Offload Media (amazon-s3-and-cloudfront-pro), Imagify, Members, WP Mail SMTP, MonsterInsights, Duplicate Post, Disable Comments, Classic Editor, Migrate Guru, WP Pusher.
+- **WP Rocket** adds another page cache. Clear it after deploys that change front-end output. The same "assume pages are cached" rule applies.
+- **WP Pusher** is installed but must not also deploy this repo; GitHub Actions is the only deploy path.
