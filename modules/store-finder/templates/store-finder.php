@@ -57,56 +57,58 @@ $total     = count( $stockists );
 			</button>
 		</div>
 
-		<?php if ( $args['use_chips'] ) : ?>
-			<div class="rowdy-crowd-store-finder__chips" role="group" aria-label="<?php esc_attr_e( 'Filter by state', 'rowdy-crowd' ); ?>">
-				<button
-					type="button"
-					class="rowdy-crowd-store-finder__chip rowdy-crowd-store-finder__chip--all"
-					data-state=""
-					aria-pressed="true"
-					<?php /* translators: %d: number of stores. */ ?>
-					aria-label="<?php echo esc_attr( sprintf( _n( 'All states, %d store', 'All states, %d stores', $total, 'rowdy-crowd' ), $total ) ); ?>"
-				>
-					<?php esc_html_e( 'All', 'rowdy-crowd' ); ?>
-					<span class="rowdy-crowd-store-finder__chip-count"><?php echo esc_html( (string) $total ); ?></span>
-				</button>
-
-				<?php foreach ( $states as $state_code => $state_name ) : ?>
+		<div class="rowdy-crowd-store-finder__filter-row">
+			<?php if ( $args['use_chips'] ) : ?>
+				<div class="rowdy-crowd-store-finder__chips" role="group" aria-label="<?php esc_attr_e( 'Filter by state', 'rowdy-crowd' ); ?>">
 					<button
 						type="button"
-						class="rowdy-crowd-store-finder__chip rowdy-crowd-store-finder__chip--<?php echo esc_attr( Stockists::chip_colour( $state_code ) ); ?>"
-						data-state="<?php echo esc_attr( $state_code ); ?>"
-						aria-pressed="false"
-						<?php /* translators: 1: state code, 2: state name, 3: number of stores. */ ?>
-						aria-label="<?php echo esc_attr( sprintf( _n( '%1$s, %2$s, %3$d store', '%1$s, %2$s, %3$d stores', $counts[ $state_code ], 'rowdy-crowd' ), $state_code, $state_name, $counts[ $state_code ] ) ); ?>"
-						title="<?php echo esc_attr( $state_name ); ?>"
+						class="rowdy-crowd-store-finder__chip rowdy-crowd-store-finder__chip--all"
+						data-state=""
+						aria-pressed="true"
+						<?php /* translators: %d: number of stores. */ ?>
+						aria-label="<?php echo esc_attr( sprintf( _n( 'All states, %d store', 'All states, %d stores', $total, 'rowdy-crowd' ), $total ) ); ?>"
 					>
-						<?php echo esc_html( $state_code ); ?>
-						<span class="rowdy-crowd-store-finder__chip-count"><?php echo esc_html( (string) $counts[ $state_code ] ); ?></span>
+						<?php esc_html_e( 'All', 'rowdy-crowd' ); ?>
+						<span class="rowdy-crowd-store-finder__chip-count"><?php echo esc_html( (string) $total ); ?></span>
 					</button>
-				<?php endforeach; ?>
-			</div>
-		<?php elseif ( count( $states ) > 1 ) : ?>
-			<div class="rowdy-crowd-store-finder__select-wrap">
-				<label class="rowdy-crowd-store-finder__sr" for="<?php echo esc_attr( $finder_id ); ?>-state"><?php esc_html_e( 'Filter by state', 'rowdy-crowd' ); ?></label>
-				<select id="<?php echo esc_attr( $finder_id ); ?>-state" class="rowdy-crowd-store-finder__state">
-					<option value=""><?php esc_html_e( 'All states', 'rowdy-crowd' ); ?></option>
-					<?php foreach ( $states as $state_code => $state_name ) : ?>
-						<option value="<?php echo esc_attr( $state_code ); ?>"><?php echo esc_html( $state_name ); ?></option>
-					<?php endforeach; ?>
-				</select>
-			</div>
-		<?php endif; ?>
 
-		<div class="rowdy-crowd-store-finder__status">
+					<?php foreach ( $states as $state_code => $state_name ) : ?>
+						<button
+							type="button"
+							class="rowdy-crowd-store-finder__chip rowdy-crowd-store-finder__chip--<?php echo esc_attr( Stockists::chip_colour( $state_code ) ); ?>"
+							data-state="<?php echo esc_attr( $state_code ); ?>"
+							aria-pressed="false"
+							<?php /* translators: 1: state code, 2: state name, 3: number of stores. */ ?>
+							aria-label="<?php echo esc_attr( sprintf( _n( '%1$s, %2$s, %3$d store', '%1$s, %2$s, %3$d stores', $counts[ $state_code ], 'rowdy-crowd' ), $state_code, $state_name, $counts[ $state_code ] ) ); ?>"
+							title="<?php echo esc_attr( $state_name ); ?>"
+						>
+							<?php echo esc_html( $state_code ); ?>
+							<span class="rowdy-crowd-store-finder__chip-count"><?php echo esc_html( (string) $counts[ $state_code ] ); ?></span>
+						</button>
+					<?php endforeach; ?>
+				</div>
+			<?php elseif ( count( $states ) > 1 ) : ?>
+				<div class="rowdy-crowd-store-finder__select-wrap">
+					<label class="rowdy-crowd-store-finder__sr" for="<?php echo esc_attr( $finder_id ); ?>-state"><?php esc_html_e( 'Filter by state', 'rowdy-crowd' ); ?></label>
+					<select id="<?php echo esc_attr( $finder_id ); ?>-state" class="rowdy-crowd-store-finder__state">
+						<option value=""><?php esc_html_e( 'All states', 'rowdy-crowd' ); ?></option>
+						<?php foreach ( $states as $state_code => $state_name ) : ?>
+							<option value="<?php echo esc_attr( $state_code ); ?>"><?php echo esc_html( $state_name ); ?></option>
+						<?php endforeach; ?>
+					</select>
+				</div>
+			<?php endif; ?>
+
 			<p class="rowdy-crowd-store-finder__count" aria-live="polite">
 				<?php
 				/* translators: %d: number of stores. */
 				echo esc_html( sprintf( _n( '%d store', '%d stores', $total, 'rowdy-crowd' ), $total ) );
 				?>
 			</p>
-			<p class="rowdy-crowd-store-finder__message" role="status" hidden></p>
 		</div>
+
+		<?php // A toast at the bottom of the screen. The script moves it to <body>. ?>
+		<p class="rowdy-crowd-store-finder__message" role="status" hidden></p>
 	</div>
 
 	<div class="rowdy-crowd-store-finder__body">

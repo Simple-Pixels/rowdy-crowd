@@ -5,7 +5,7 @@
 | | |
 | --- | --- |
 | Type | Site-specific (Rowdy Crowd, `rowdycrowd.com.au` / `rowdycrowd.com`) |
-| Version | 0.5.1 (`ROWDY_CROWD_VERSION` + plugin header) |
+| Version | 0.5.2 (`ROWDY_CROWD_VERSION` + plugin header) |
 | Main file | `rowdy-crowd.php` |
 | Text domain | `rowdy-crowd` |
 | Prefix | `RowdyCrowd\` (namespaces), `rowdy_crowd_` (hooks, options, meta), `ROWDY_CROWD_` (constants), `rowdy-crowd-` (handles, CSS) |
@@ -125,6 +125,7 @@ Module hooks are listed in each module's README (e.g. `rowdy_crowd_region`, `row
 
 | Version | Notes |
 | --- | --- |
+| 0.5.2 | Store finder: the chosen state chip is a plain fill with white text (no tick), the store count sits at the right of the chip row, and the "Stores near me" messages are a toast at the bottom centre of the screen. |
 | 0.5.1 | Store finder: Suburb, State and Postcode fields (imported stores had none, so no chips and no postcode search), "Stores near me" in white on orange, a taller finder, no sideways scrolling in the list, a single focus ring on the search, and the popup close button no longer clipped. Plugin assets are excluded from the WP Rocket minify cache so visitors cannot be served a stale script. |
 | 0.5.0 | Store finder: state chips, "Stores near me", clickable store cards (the "Show on map" button is gone), a tighter info window, brand colours beyond pink, and a stable layout when no stores match. |
 | 0.4.1 | Stockist fields are saved to ACF's database (ACF → Field Groups) so WP All Import can see them. |

@@ -21,6 +21,8 @@
 	const EARTH_RADIUS_KM = 6371;
 	const KM_PER_MILE = 1.609344;
 	const GEOLOCATION_OPTIONS = { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 };
+	const TOAST_RESULT_MS = 6000; // How long "Nearest store: ..." stays on screen.
+	const TOAST_ERROR_MS = 8000; // Problems stay a little longer.
 	const CLASS = 'rowdy-crowd-store-finder__';
 
 	const finders = [];
@@ -79,6 +81,11 @@
 			this.nearMeButton = root.querySelector( '.' + CLASS + 'near-me' );
 			this.countElement = root.querySelector( '.' + CLASS + 'count' );
 			this.messageElement = root.querySelector( '.' + CLASS + 'message' );
+			this.messageTimer = null;
+
+			// A fixed toast must be a child of <body>: inside an Elementor section with a transform,
+			// "fixed" is measured from that section instead of the screen.
+			document.body.appendChild( this.messageElement );
 			this.emptyElement = root.querySelector( '.' + CLASS + 'empty' );
 			this.clearButton = root.querySelector( '.' + CLASS + 'clear' );
 
@@ -427,12 +434,13 @@
 			}
 
 			if ( ! navigator.geolocation ) {
-				this.showMessage( this.root.dataset.msgUnavailable, true );
+				this.showMessage( this.root.dataset.msgUnavailable, true, TOAST_ERROR_MS );
 				return;
 			}
 
 			this.nearMeButton.setAttribute( 'aria-busy', 'true' );
-			this.showMessage( this.root.dataset.msgLocating, false );
+			// No timeout: it stays until the lookup succeeds or fails.
+			this.showMessage( this.root.dataset.msgLocating, false, 0 );
 
 			navigator.geolocation.getCurrentPosition(
 				( position ) => this.onLocated( position ),
@@ -460,7 +468,7 @@
 			this.setState( '' );
 			this.nearMeButton.setAttribute( 'aria-pressed', 'true' );
 			this.showUserMarker();
-			this.showMessage( this.root.dataset.msgNearest.replace( '%s', this.formatDistance( this.items[ 0 ].distance ) ), false );
+			this.showMessage( this.root.dataset.msgNearest.replace( '%s', this.formatDistance( this.items[ 0 ].distance ) ), false, TOAST_RESULT_MS );
 			this.applyFilters();
 			this.list.scrollTop = 0;
 		}
@@ -468,7 +476,7 @@
 		onLocateError( error ) {
 			this.nearMeButton.removeAttribute( 'aria-busy' );
 			// Code 1 is "permission denied". Anything else is a timeout or no signal.
-			this.showMessage( error && error.code === 1 ? this.root.dataset.msgDenied : this.root.dataset.msgFailed, true );
+			this.showMessage( error && error.code === 1 ? this.root.dataset.msgDenied : this.root.dataset.msgFailed, true, TOAST_ERROR_MS );
 		}
 
 		/**
@@ -552,16 +560,27 @@
 		}
 
 		/**
-		 * @param {string}  text    Message for the visitor.
-		 * @param {boolean} isError True for problems, so they look different.
+		 * Shows the toast at the bottom of the screen.
+		 *
+		 * @param {string}  text      Message for the visitor.
+		 * @param {boolean} isError   True for problems, so they look different.
+		 * @param {number}  hideAfter Milliseconds before it goes away. 0 keeps it until replaced or hidden.
 		 */
-		showMessage( text, isError ) {
+		showMessage( text, isError, hideAfter ) {
+			window.clearTimeout( this.messageTimer );
+
 			this.messageElement.textContent = text;
 			this.messageElement.classList.toggle( 'is-error', isError );
 			this.messageElement.hidden = false;
+
+			if ( hideAfter > 0 ) {
+				this.messageTimer = window.setTimeout( () => this.hideMessage(), hideAfter );
+			}
 		}
 
 		hideMessage() {
+			window.clearTimeout( this.messageTimer );
+
 			this.messageElement.hidden = true;
 			this.messageElement.textContent = '';
 		}
