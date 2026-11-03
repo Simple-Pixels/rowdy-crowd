@@ -20,6 +20,7 @@ final class Plugin {
 	private const MODULES = array(
 		\RowdyCrowd\Modules\Geolocation\Module::class,
 		\RowdyCrowd\Modules\Currency\Module::class,
+		\RowdyCrowd\Modules\Store_Finder\Module::class,
 	);
 
 	private static ?Plugin $instance = null;

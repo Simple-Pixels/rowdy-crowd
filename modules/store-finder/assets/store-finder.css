@@ -1,0 +1,253 @@
+/**
+ * Store finder: search, state filter, store list and map.
+ *
+ * --rowdy-crowd-store-finder-accent and --rowdy-crowd-store-finder-height are set inline from
+ * the pin colour setting and the shortcode's height attribute.
+ */
+.rowdy-crowd-store-finder {
+	--rowdy-crowd-store-finder-accent: #e93cac;
+	--rowdy-crowd-store-finder-height: 560px;
+	--rowdy-crowd-store-finder-text: var(--e-global-color-text, #403a35);
+	--rowdy-crowd-store-finder-border: rgba(0, 0, 0, 0.14);
+
+	color: var(--rowdy-crowd-store-finder-text);
+}
+
+.rowdy-crowd-store-finder [hidden] {
+	display: none !important;
+}
+
+/* Visually hidden, but read by screen readers. */
+.rowdy-crowd-store-finder__sr {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+.rowdy-crowd-store-finder__notice {
+	margin: 0 0 1rem;
+	padding: 0.6em 1em;
+	border-left: 4px solid var(--rowdy-crowd-store-finder-accent);
+	background: rgba(0, 0, 0, 0.04);
+	font-size: 0.9em;
+}
+
+/* Controls */
+.rowdy-crowd-store-finder__controls {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.75rem 1rem;
+	margin-bottom: 1rem;
+}
+
+.rowdy-crowd-store-finder .rowdy-crowd-store-finder__search,
+.rowdy-crowd-store-finder .rowdy-crowd-store-finder__state {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0.65em 1.1em;
+	border: 1px solid var(--rowdy-crowd-store-finder-border);
+	border-radius: 999px;
+	background-color: #fff;
+	box-shadow: none;
+	color: inherit;
+	font: inherit;
+	font-size: 0.95em;
+	line-height: 1.3;
+}
+
+.rowdy-crowd-store-finder .rowdy-crowd-store-finder__search {
+	flex: 1 1 260px;
+}
+
+.rowdy-crowd-store-finder .rowdy-crowd-store-finder__state {
+	flex: 0 1 240px;
+}
+
+.rowdy-crowd-store-finder .rowdy-crowd-store-finder__search:focus,
+.rowdy-crowd-store-finder .rowdy-crowd-store-finder__state:focus {
+	border-color: var(--rowdy-crowd-store-finder-accent);
+	outline: 2px solid var(--rowdy-crowd-store-finder-accent);
+	outline-offset: 1px;
+}
+
+.rowdy-crowd-store-finder__count {
+	flex: 0 0 auto;
+	margin: 0;
+	font-size: 0.9em;
+	opacity: 0.75;
+}
+
+.rowdy-crowd-store-finder__empty {
+	margin: 0 0 1rem;
+}
+
+/* List and map */
+.rowdy-crowd-store-finder__body {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 1.25rem;
+	align-items: start;
+}
+
+.rowdy-crowd-store-finder--map .rowdy-crowd-store-finder__body {
+	grid-template-columns: minmax(280px, 380px) minmax(0, 1fr);
+}
+
+.rowdy-crowd-store-finder.has-map-error .rowdy-crowd-store-finder__body {
+	grid-template-columns: 1fr;
+}
+
+.rowdy-crowd-store-finder__list {
+	position: relative; /* Makes each item's offsetTop relative to the list, for scrolling. */
+	margin: 0;
+	padding: 0;
+	overflow-y: auto;
+	max-height: var(--rowdy-crowd-store-finder-height);
+	list-style: none;
+	border: 1px solid var(--rowdy-crowd-store-finder-border);
+	border-radius: 14px;
+	background: #fff;
+}
+
+/* With no map the list gets the full width, in columns. */
+.rowdy-crowd-store-finder:not(.rowdy-crowd-store-finder--map) .rowdy-crowd-store-finder__list,
+.rowdy-crowd-store-finder.has-map-error .rowdy-crowd-store-finder__list {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+	max-height: none;
+	overflow: visible;
+	border: 0;
+	background: transparent;
+	gap: 1rem;
+}
+
+.rowdy-crowd-store-finder:not(.rowdy-crowd-store-finder--map) .rowdy-crowd-store-finder__item,
+.rowdy-crowd-store-finder.has-map-error .rowdy-crowd-store-finder__item {
+	border: 1px solid var(--rowdy-crowd-store-finder-border);
+	border-radius: 14px;
+	background: #fff;
+}
+
+.rowdy-crowd-store-finder__item {
+	margin: 0;
+	padding: 1rem 1.15rem;
+	border-bottom: 1px solid var(--rowdy-crowd-store-finder-border);
+}
+
+.rowdy-crowd-store-finder__item:last-child {
+	border-bottom: 0;
+}
+
+.rowdy-crowd-store-finder__item.is-active {
+	background: rgba(0, 0, 0, 0.03);
+	background: color-mix(in srgb, var(--rowdy-crowd-store-finder-accent) 9%, #fff);
+	box-shadow: inset 4px 0 0 var(--rowdy-crowd-store-finder-accent);
+}
+
+.rowdy-crowd-store-finder__item p {
+	margin: 0 0 0.3em;
+	font-size: 0.95em;
+	line-height: 1.45;
+}
+
+.rowdy-crowd-store-finder .rowdy-crowd-store-finder__name {
+	font-size: 1.05em;
+	font-weight: 700;
+}
+
+.rowdy-crowd-store-finder a {
+	color: var(--rowdy-crowd-store-finder-accent);
+	text-decoration: underline;
+}
+
+.rowdy-crowd-store-finder__actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.25rem 1.1rem;
+	margin-top: 0.6em !important;
+}
+
+/*
+ * The Elementor kit restyles every button on hover and focus (accent background, no border),
+ * so the look is repeated for each state to keep it a plain text link.
+ */
+.rowdy-crowd-store-finder .rowdy-crowd-store-finder__locate,
+.rowdy-crowd-store-finder .rowdy-crowd-store-finder__locate:hover,
+.rowdy-crowd-store-finder .rowdy-crowd-store-finder__locate:focus,
+.rowdy-crowd-store-finder .rowdy-crowd-store-finder__locate:active {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-radius: 0;
+	background: transparent;
+	box-shadow: none;
+	color: var(--rowdy-crowd-store-finder-accent);
+	font: inherit;
+	font-weight: 600;
+	letter-spacing: normal;
+	text-decoration: underline;
+	text-transform: none;
+	cursor: pointer;
+}
+
+.rowdy-crowd-store-finder .rowdy-crowd-store-finder__locate:focus-visible {
+	outline: 2px solid var(--rowdy-crowd-store-finder-accent);
+	outline-offset: 2px;
+}
+
+/* "Show on map" only makes sense once the map is there. */
+.rowdy-crowd-store-finder:not(.is-map-ready) .rowdy-crowd-store-finder__locate {
+	display: none;
+}
+
+.rowdy-crowd-store-finder__map {
+	height: var(--rowdy-crowd-store-finder-height);
+	overflow: hidden;
+	border-radius: 14px;
+	background: #e9ecef;
+}
+
+/* Info window content (copied from the list item). */
+.rowdy-crowd-store-finder__info {
+	color: var(--rowdy-crowd-store-finder-text);
+	font-size: 14px;
+	line-height: 1.45;
+}
+
+.rowdy-crowd-store-finder__info p {
+	margin: 0 0 0.25em;
+}
+
+.rowdy-crowd-store-finder__info .rowdy-crowd-store-finder__name {
+	font-size: 15px;
+	font-weight: 700;
+}
+
+.rowdy-crowd-store-finder__info .rowdy-crowd-store-finder__directions {
+	display: inline-block;
+	margin-top: 0.4em;
+	font-weight: 600;
+}
+
+@media (max-width: 767px) {
+	.rowdy-crowd-store-finder--map .rowdy-crowd-store-finder__body {
+		grid-template-columns: 1fr;
+	}
+
+	/* Map first on phones, then the list. */
+	.rowdy-crowd-store-finder--map .rowdy-crowd-store-finder__map {
+		order: -1;
+		height: 360px;
+	}
+
+	.rowdy-crowd-store-finder__list {
+		max-height: 60vh;
+	}
+}

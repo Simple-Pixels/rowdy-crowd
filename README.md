@@ -5,7 +5,7 @@
 | | |
 | --- | --- |
 | Type | Site-specific (Rowdy Crowd, `rowdycrowd.com.au` / `rowdycrowd.com`) |
-| Version | 0.3.1 (`ROWDY_CROWD_VERSION` + plugin header) |
+| Version | 0.4.0 (`ROWDY_CROWD_VERSION` + plugin header) |
 | Main file | `rowdy-crowd.php` |
 | Text domain | `rowdy-crowd` |
 | Prefix | `RowdyCrowd\` (namespaces), `rowdy_crowd_` (hooks, options, meta), `ROWDY_CROWD_` (constants), `rowdy-crowd-` (handles, CSS) |
@@ -19,6 +19,7 @@ Rowdy Crowd is moving from two Shopify stores (AU and US) to one WooCommerce sit
 | --- | --- | --- |
 | [geolocation](modules/geolocation/) | In progress | AU/US regions by domain, `aunz`/`usa` visibility classes, first-visit geo redirect, `[region_switcher]` (also switches currency). |
 | [currency](modules/currency/) | In progress | `[currency_switcher]` for WooPayments Multi-Currency (AUD, EUR, NZD, GBP, USD). |
+| [store-finder](modules/store-finder/) | In progress | Stockists post type and `[store_finder]`: searchable store list with a Google Map. |
 
 Each module has its own README with settings, hooks and files.
 
@@ -29,7 +30,7 @@ Each module has its own README with settings, hooks and files.
 | WordPress | 6.4+ |
 | PHP | 8.1+ |
 | Required plugins | None for the core. WooCommerce-dependent modules gate themselves with `is_enabled()`. |
-| Optional plugins | WooCommerce, Elementor / Elementor Pro (the site's page builder), WooPayments with Multi-Currency (needed for the currency switcher and region → currency switching). |
+| Optional plugins | WooCommerce, Elementor / Elementor Pro (the site's page builder), WooPayments with Multi-Currency (needed for the currency switcher and region → currency switching), Advanced Custom Fields (needed for the store finder, which also needs a Google Maps API key). |
 | Hosting | **Kinsta**: full-page cache and IP geolocation (MyKinsta → Tools → Geolocation). Both domains on the same site. |
 
 ## Installation
@@ -49,6 +50,7 @@ There is no plugin-wide settings page. Configuration is per module (see each mod
 | --- | --- |
 | `[region_switcher]` | geolocation (switches region and currency) |
 | `[currency_switcher]` | currency |
+| `[store_finder region="current" height="560px"]` | store-finder |
 
 Both render the shared dropdown: transparent background, white border, no flags.
 
@@ -86,6 +88,7 @@ includes/                    Core (RowdyCrowd\Core): Autoloader, Plugin, abstrac
 modules/                     One folder per feature                                      → modules/README.md
   geolocation/               AU/US regions, redirect, switcher                            → modules/geolocation/README.md
   currency/                  [currency_switcher] for WooPayments Multi-Currency           → modules/currency/README.md
+  store-finder/              Stockists post type, [store_finder], Google Maps settings    → modules/store-finder/README.md
 assets/                      Shared front-end files (dropdown CSS/JS)
 .github/workflows/deploy.yml GitHub Actions deploy to Kinsta (on push to main)
 CLAUDE.md                    Project context, coding standards, git workflow
@@ -122,6 +125,7 @@ Module hooks are listed in each module's README (e.g. `rowdy_crowd_region`, `row
 
 | Version | Notes |
 | --- | --- |
+| 0.4.0 | Store finder module: Stockists post type, Google Maps settings and `[store_finder]` (searchable list, state filter, map). |
 | 0.3.1 | Fix switcher shrinking on hover/focus (the Elementor kit removed its border). Smaller, lighter text. |
 | 0.3.0 | Currency module with `[currency_switcher]`. `[region_switcher]` now also switches currency (AUD/USD). Both switchers share one dropdown: no flags, transparent background, white border. Hello World module removed. |
 | 0.2.0 | Geolocation module (AU/US regions, redirect, switcher). |
