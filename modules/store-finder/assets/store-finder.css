@@ -4,6 +4,8 @@
  * Colours are Rowdy Crowd's brand palette. Pink, teal, orange and lime are too light to use as
  * text on white, so they're used as fills and tints (with near-black text); links and focus
  * rings use blue, and body text uses the brand's dark ink. All of those pass WCAG AA.
+ * One exception, at the client's request: "Stores near me" is white on brand orange. That
+ * is 2.96:1, a little under the 3:1 minimum for large text, so it's bold and full size.
  *
  * --rowdy-crowd-store-finder-height is set inline from the shortcode's height attribute.
  */
@@ -16,7 +18,7 @@
 	--rowdy-crowd-ink: #403a35;
 	--rowdy-crowd-on-colour: #1f1b19; /* Text on pink, teal, orange and lime fills. */
 	--rowdy-crowd-line: rgba(64, 58, 53, 0.16);
-	--rowdy-crowd-store-finder-height: 560px;
+	--rowdy-crowd-store-finder-height: 720px;
 
 	color: var(--rowdy-crowd-ink);
 }
@@ -115,12 +117,15 @@
 	flex: 1 1 260px;
 }
 
-.rowdy-crowd-store-finder .rowdy-crowd-store-finder__search:focus,
-.rowdy-crowd-store-finder .rowdy-crowd-store-finder__state:focus {
+/* One focus indicator: a blue border with a soft halo, not a border plus an outline ring. */
+.rowdy-crowd-store-finder .rowdy-crowd-store-finder__search:is(:focus, :focus-visible),
+.rowdy-crowd-store-finder .rowdy-crowd-store-finder__state:is(:focus, :focus-visible) {
 	border-color: var(--rowdy-crowd-blue);
+	outline: 0;
+	box-shadow: 0 0 0 3px rgba(49, 97, 149, 0.22);
 }
 
-/* "Stores near me": teal until pressed, then blue. */
+/* "Stores near me": white on brand orange until pressed, then blue. */
 .rowdy-crowd-store-finder .rowdy-crowd-store-finder__near-me,
 .rowdy-crowd-store-finder .rowdy-crowd-store-finder__near-me:is(:hover, :focus, :active) {
 	display: inline-flex;
@@ -128,11 +133,11 @@
 	align-items: center;
 	gap: 0.55em;
 	padding: 0.65em 1.25em;
-	border: 2px solid var(--rowdy-crowd-teal);
+	border: 2px solid var(--rowdy-crowd-orange);
 	border-radius: 999px;
-	background: var(--rowdy-crowd-teal);
-	color: var(--rowdy-crowd-on-colour);
-	font-size: 0.95em;
+	background: var(--rowdy-crowd-orange);
+	color: #fff;
+	font-size: 1em;
 	font-weight: 700;
 	line-height: 1.3;
 }
@@ -308,6 +313,7 @@
 	position: relative; /* Makes each item's offsetTop relative to the list, for scrolling. */
 	margin: 0;
 	padding: 0;
+	overflow-x: hidden; /* Nothing in a card should ever make the list scroll sideways. */
 	overflow-y: auto;
 	max-height: var(--rowdy-crowd-store-finder-height);
 	list-style: none;
@@ -336,8 +342,10 @@
 }
 
 .rowdy-crowd-store-finder__item {
+	min-width: 0;
 	margin: 0;
 	padding: 1rem 1.15rem;
+	overflow-wrap: anywhere; /* Long names, emails and web addresses wrap instead of widening the list. */
 	border-bottom: 1px solid var(--rowdy-crowd-line);
 	transition: background-color 0.15s ease;
 }
@@ -379,8 +387,11 @@
 .rowdy-crowd-store-finder .rowdy-crowd-store-finder__select,
 .rowdy-crowd-store-finder .rowdy-crowd-store-finder__select:is(:hover, :focus, :active, :disabled) {
 	flex: 1 1 auto;
+	min-width: 0;
 	font-weight: 700;
 	text-align: left;
+	/* Hello Elementor sets white-space: nowrap on every button, which stopped long names wrapping. */
+	white-space: normal;
 	cursor: inherit;
 	opacity: 1;
 }
@@ -490,8 +501,9 @@
 
 .rowdy-crowd-store-finder .rowdy-crowd-store-finder__info-close,
 .rowdy-crowd-store-finder .rowdy-crowd-store-finder__info-close:is(:hover, :focus, :active) {
+	/* Fully inside the popup's scrolling content box: above it, the top edge is clipped. */
 	position: absolute;
-	top: -4px;
+	top: 0;
 	right: 8px;
 	width: 28px;
 	height: 28px;
@@ -514,7 +526,7 @@
 	}
 
 	.rowdy-crowd-store-finder__map {
-		height: 360px;
+		height: 420px;
 	}
 
 	.rowdy-crowd-store-finder__list {

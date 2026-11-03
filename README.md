@@ -5,7 +5,7 @@
 | | |
 | --- | --- |
 | Type | Site-specific (Rowdy Crowd, `rowdycrowd.com.au` / `rowdycrowd.com`) |
-| Version | 0.5.0 (`ROWDY_CROWD_VERSION` + plugin header) |
+| Version | 0.5.1 (`ROWDY_CROWD_VERSION` + plugin header) |
 | Main file | `rowdy-crowd.php` |
 | Text domain | `rowdy-crowd` |
 | Prefix | `RowdyCrowd\` (namespaces), `rowdy_crowd_` (hooks, options, meta), `ROWDY_CROWD_` (constants), `rowdy-crowd-` (handles, CSS) |
@@ -111,7 +111,7 @@ Module hooks are listed in each module's README (e.g. `rowdy_crowd_region`, `row
 - **WooCommerce-dependent modules must return false from `is_enabled()`** when Woo isn't active, so the plugin never fatals.
 - **Lint PHP before pushing: merging to `main` deploys to live.** PHP 8.4 comes with Laravel Herd (`~/.config/herd/bin/php84/php.exe -l <file>`). WordPress isn't installed locally, so test behaviour on staging.
 - **Merging into `main` deploys to live**, and the deploy uses `rsync --delete`. Never edit plugin files on the server, and add any new dev-only files to the workflow's `--exclude` list.
-- **WP Rocket also caches pages.** Clear it after deploys that change front-end output.
+- **WP Rocket also caches pages, and can serve stale scripts.** Clear it after deploys that change front-end output. The plugin's own scripts and styles are excluded from its minify cache, but the first deploy with that change needs one clear. Check changes as a logged-out visitor, not as an admin. See [modules/store-finder/README.md](modules/store-finder/README.md#gotchas).
 - **Currency is per visitor, pages are cached.** The currency switcher's label is rendered on the server, so test it with caching on (Kinsta and WP Rocket). See [modules/currency/README.md](modules/currency/README.md#caching).
 
 ## Development
@@ -125,6 +125,7 @@ Module hooks are listed in each module's README (e.g. `rowdy_crowd_region`, `row
 
 | Version | Notes |
 | --- | --- |
+| 0.5.1 | Store finder: Suburb, State and Postcode fields (imported stores had none, so no chips and no postcode search), "Stores near me" in white on orange, a taller finder, no sideways scrolling in the list, a single focus ring on the search, and the popup close button no longer clipped. Plugin assets are excluded from the WP Rocket minify cache so visitors cannot be served a stale script. |
 | 0.5.0 | Store finder: state chips, "Stores near me", clickable store cards (the "Show on map" button is gone), a tighter info window, brand colours beyond pink, and a stable layout when no stores match. |
 | 0.4.1 | Stockist fields are saved to ACF's database (ACF → Field Groups) so WP All Import can see them. |
 | 0.4.0 | Store finder module: Stockists post type, Google Maps settings and `[store_finder]` (searchable list, state filter, map). |

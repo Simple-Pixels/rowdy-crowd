@@ -9,6 +9,8 @@ Shared plugin infrastructure. Namespace: `RowdyCrowd\Core`.
 | `class-module.php` | `Module` | Abstract base for all modules. Provides `get_id()`, `register()`, `is_enabled()`, and `path()` / `url()` helpers. |
 | `class-dropdown.php` | `Dropdown` | Shared dropdown used by `[region_switcher]` and `[currency_switcher]`: `Dropdown::render()` returns the markup, `Dropdown::register()` loads `assets/dropdown.css` and `assets/dropdown.js`. Modules that render a dropdown call `register()` and reuse it instead of writing their own. |
 
+`class-wp-rocket.php` (`Wp_Rocket`) keeps this plugin's own scripts and styles out of WP Rocket's minify cache, so a new version never serves a stale copy. It does nothing when WP Rocket isn't active.
+
 Shared front-end files used by core classes live in the plugin's root `assets/` folder. Module-specific assets stay in the module's own `assets/` folder.
 
 ## Global constants
