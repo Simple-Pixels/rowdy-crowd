@@ -75,6 +75,48 @@ final class Stockists {
 	}
 
 	/**
+	 * How many of the given stockists are in each state. Code => count.
+	 *
+	 * @param Stockist[] $stockists Stockists.
+	 * @return array<string, int>
+	 */
+	public static function state_counts( array $stockists ): array {
+		$counts = array();
+
+		foreach ( $stockists as $stockist ) {
+			if ( '' !== $stockist->state_code ) {
+				$counts[ $stockist->state_code ] = ( $counts[ $stockist->state_code ] ?? 0 ) + 1;
+			}
+		}
+
+		return $counts;
+	}
+
+	/**
+	 * Brand colour for a state's filter chip: pink, teal, orange, lime or blue.
+	 *
+	 * Australian states have fixed colours so each keeps its own. Any other state gets a stable
+	 * colour worked out from its code.
+	 *
+	 * @param string $state_code State code, e.g. "NSW".
+	 */
+	public static function chip_colour( string $state_code ): string {
+		$fixed   = array(
+			'NSW' => 'blue',
+			'ACT' => 'pink',
+			'VIC' => 'teal',
+			'QLD' => 'orange',
+			'SA'  => 'lime',
+			'WA'  => 'pink',
+			'TAS' => 'blue',
+			'NT'  => 'lime',
+		);
+		$palette = array( 'pink', 'teal', 'orange', 'lime', 'blue' );
+
+		return $fixed[ $state_code ] ?? $palette[ abs( crc32( $state_code ) ) % count( $palette ) ];
+	}
+
+	/**
 	 * Stockists with no region saved (e.g. imported ones) count as the default region.
 	 *
 	 * @param string $region Region key.

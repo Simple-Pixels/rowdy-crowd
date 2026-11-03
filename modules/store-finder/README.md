@@ -47,13 +47,18 @@ A stockist **without a map location is not shown on the site**. The Stockists li
 
 What visitors get:
 
-- A search box (matches store name, street, suburb, state or postcode; every word must match) and a state filter. The filter only appears when stores are in more than one state, and only lists states that have stores.
-- A list sorted by state, suburb and name, with address, phone, website, **Show on map** and **Directions** (opens Google Maps).
-- A map with a pin per store. Clicking a pin opens an info window and highlights the store in the list. **Show on map** does the reverse. Search and the filter update the list and the pins together.
+- **Search** (matches store name, street, suburb, state or postcode; every word must match).
+- **State chips**: one per state that has stores, in the state's brand colour, with a store count (e.g. `NSW 31`), plus **All**. Pick one to filter. With more than 12 states (e.g. the US) a dropdown is used instead.
+- **Stores near me**: asks the browser for the visitor's location, then sorts the list nearest first with the distance on each card (km, or miles on the US site), marks the visitor on the map and frames the nearest few stores. Press it again to go back. If location is blocked, times out or isn't available, a message says so and suggests searching instead. The location stays in the browser: nothing is sent to the server or stored.
+- **A list** sorted by state, suburb and name, with address, phone, website and **Directions** (opens Google Maps).
+- **A map** with a pin per store. **Clicking anywhere on a store's card** zooms the map to that store and opens its info window; clicking a pin does the reverse and highlights the card. Links inside a card (phone, website, directions) still work as links. The store name is a real button underneath, so keyboard and screen-reader users can select a store too.
+- Search and the filters update the list and the pins together.
 - Stores at exactly the same address are spread into a small circle so each pin can be clicked.
-- On phones the map sits above the list.
+- On phones the map sits above the list and the chips scroll sideways in one row.
 
-If there are no stores for the region, visitors see "We don't have any stores listed here yet."
+**When nothing matches**, a "No stores match your search" card takes the list's place (the map doesn't move) with a **Clear search and filters** button, and the map goes back to the whole country.
+
+If there are no stores for the region at all, visitors see "We don't have any stores listed here yet."
 
 ## How it works
 
@@ -86,13 +91,25 @@ The fields are defined in code (`class-stockist-fields.php`) **and saved to ACF'
 
 ### Front end
 
-The CSS, the JS and the Google Maps script load only on pages that use the shortcode. Without an API key there is no Google script, no map and no "Show on map" button: visitors get the list as a grid of cards, and administrators see a note saying why.
+The CSS, the JS and the Google Maps script load only on pages that use the shortcode. Without an API key there is no Google script and no map, and cards can't be selected: visitors get the list as a grid of cards (search, chips and **Stores near me** still work), and administrators see a note saying why.
 
 If Google rejects the key, the map is removed and the list falls back to the same card grid.
 
 ## Styling
 
-Colours follow the **pin colour** setting. The text colour follows the Elementor global text colour. Override these custom properties on `.rowdy-crowd-store-finder` to change the rest: `--rowdy-crowd-store-finder-accent`, `-height`, `-text`, `-border`.
+The finder uses Rowdy Crowd's brand palette, defined as custom properties on `.rowdy-crowd-store-finder`:
+
+| Property | Colour | Used for |
+| --- | --- | --- |
+| `--rowdy-crowd-ink` | `#403A35` | Body text. |
+| `--rowdy-crowd-blue` | `#316195` | Links, focus rings, the pressed "Stores near me" button, the NSW chip. |
+| `--rowdy-crowd-teal` | `#00BBB4` | "Stores near me" button, the chosen card, the VIC chip. |
+| `--rowdy-crowd-pink` | `#E93CAC` | State chips (ACT, WA). The map pins use the **pin colour** setting, which defaults to this. |
+| `--rowdy-crowd-orange` | `#FF6418` | QLD chip, location error messages. |
+| `--rowdy-crowd-lime` | `#B7BF10` | SA chip, distance badges, the "no stores" card. |
+| `--rowdy-crowd-on-colour` | `#1F1B19` | Text on the pink, teal, orange and lime fills. |
+
+**Contrast:** only blue and the ink are used as text colours on white. Pink, teal, orange and lime are too light for that (under 4.5:1), so they're used as fills and tints with near-black text, which passes. Keep that if you change the colours. State chip colours come from `Stockists::chip_colour()`. Other custom property: `--rowdy-crowd-store-finder-height` (set by the `height` attribute).
 
 ## Hooks
 
@@ -106,7 +123,7 @@ None yet. Region helpers come from the geolocation module (`Region::current()`).
 | `class-stockist-post-type.php` | The Stockists post type, store-name placeholder and admin list columns. |
 | `class-stockist-fields.php` | The ACF field group definition, and saving it to ACF's database. |
 | `class-stockist.php` | One store: reads the fields, formats address, phone, website, directions link and search text. |
-| `class-stockists.php` | Queries stores by region; lists the states for the filter. |
+| `class-stockists.php` | Queries stores by region; lists the states, their store counts and chip colours. |
 | `class-settings.php` | Stockists → Settings (API key, Map ID, pin colour) and the key constant. |
 | `class-shortcode.php` | `[store_finder]`: attributes, asset loading, template. |
 | `templates/store-finder.php` | Markup for the finder. |
@@ -119,10 +136,13 @@ None yet. Region helpers come from the geolocation module (`Region::current()`).
 - **The key needs the Places API as well as Maps JavaScript**, or the address search on the stockist screen won't work even though the front-end map does.
 - **The key must allow every domain** the site is served from, including the staging domain, or the map is replaced by the list (and the stockist screen's address search fails).
 - **`DEMO_MAP_ID`** is Google's sample ID. It works, but create a real Map ID for the live site.
-- **Info-window and pin styling** can be affected by Google changing its markup. Info windows use Google's default frame and close button.
-- **Buttons:** the Elementor kit restyles every `<button>` on hover and focus, so `.rowdy-crowd-store-finder__locate` repeats its look for each state. Keep that if you change it.
+- **The info window's header row is switched off** (`headerDisabled`, a documented Google option). Google reserves a 48px row at the top for its close button, which left a gap above the text, so the popup draws its own close button. The popup's padding is tuned to Google's own 12px (top, left and bottom), measured on the live site.
+- **Buttons:** the Elementor kit restyles every `<button>` on hover and focus, so each of this module's buttons (`near-me`, `chip`, `select`, `clear`, `info-close`) repeats its look for every state in `store-finder.css`. Keep that if you add or change a button.
+- **"Stores near me" needs HTTPS** (browsers only share location on secure pages) and the visitor's permission. It measures straight-line distance, not driving distance.
 - **Bulk import isn't built.** The Google Map value is a serialised array, so an import has to write that structure (address plus latitude and longitude at least).
 
 ## Testing
 
-Real Google Maps can't be exercised without a key. During development the list, search, state filter, markers, fan-out, info windows, no-key and key-rejected fallbacks and the phone layout were checked in a browser against a stand-in for the Maps API, with stubbed WordPress and ACF. Test the real map on staging after adding a key: check that pins land in the right places, that the address search works on the stockist screen, and that both domains load the map.
+During development the list, search, state chips and dropdown, "Stores near me" (success, permission denied, timeout and no-geolocation, with the browser's location faked), card and pin selection, markers, fan-out, the nothing-matches layout, the no-key and key-rejected fallbacks and the phone layout were checked in a browser against a stand-in for the Maps API, with stubbed WordPress and ACF. A simulated copy of the Elementor kit's button hover rule was included, and every button kept its look. The info window's spacing was measured against the real Google Maps on the staging site.
+
+Not covered: the real map's pins and clicks (the stand-in replaces Google), and a real browser location prompt. After deploying, check on staging that pins land in the right places, that clicking a card zooms to the store, that **Stores near me** asks for permission and sorts by distance, that the address search works on the stockist screen, and that both domains load the map.
