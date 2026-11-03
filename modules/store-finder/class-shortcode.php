@@ -28,7 +28,7 @@ final class Shortcode {
 
 	private const SCRIPT_HANDLE  = 'rowdy-crowd-store-finder';
 	private const MAPS_HANDLE    = 'rowdy-crowd-google-maps';
-	private const DEFAULT_HEIGHT = '560px';
+	private const DEFAULT_HEIGHT = '720px';
 
 	/**
 	 * Most states that get a filter chip each. More than this (e.g. US states) uses a dropdown.

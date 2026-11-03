@@ -46,9 +46,11 @@ final class Plugin {
 	private function __construct() {}
 
 	/**
-	 * Registers all enabled modules.
+	 * Registers the core compatibility hooks and all enabled modules.
 	 */
 	public function boot(): void {
+		( new Wp_Rocket() )->register();
+
 		/**
 		 * Filters the list of module classes the plugin loads.
 		 *

@@ -18,13 +18,18 @@ defined( 'ABSPATH' ) || exit;
  * the WP All Import ACF add-on. So the definition lives here, in code, and is saved to the
  * database as a normal ACF field group ("Stockist details"). It shows under ACF → Field Groups.
  *
- * The store name is the post title. The Google Map field is the single source for the pin,
- * suburb, state and postcode, so an address is only entered once.
+ * The store name is the post title. The Google Map field gives the pin and, when an address is
+ * picked from Google's search, the suburb, state and postcode too. Stores that arrive without
+ * those (an import that only saved a street and a pin) can have them filled in on the
+ * Suburb, State and Postcode fields, which take priority over the map's.
  */
 final class Stockist_Fields {
 
 	public const LOCATION = 'rowdy_crowd_location';
 	public const ADDRESS  = 'rowdy_crowd_address';
+	public const SUBURB   = 'rowdy_crowd_suburb';
+	public const STATE    = 'rowdy_crowd_state';
+	public const POSTCODE = 'rowdy_crowd_postcode';
 	public const PHONE    = 'rowdy_crowd_phone';
 	public const WEBSITE  = 'rowdy_crowd_website';
 	public const REGION   = 'rowdy_crowd_region';
@@ -36,7 +41,7 @@ final class Stockist_Fields {
 	 * Version of the definition in definition(). Bump it whenever the fields change, so the
 	 * change is saved to the database again (replacing any edits made on the ACF screen).
 	 */
-	private const VERSION = '1';
+	private const VERSION = '2';
 
 	public function register(): void {
 		add_action( 'admin_init', array( $this, 'maybe_save_field_group' ) );
@@ -106,6 +111,32 @@ final class Stockist_Fields {
 					'name'         => self::ADDRESS,
 					'type'         => 'text',
 					'instructions' => __( 'Optional. Replaces the street part of the address shown to customers, for example "Shop 2, 76 George Street". Leave blank to use the address from the map.', 'rowdy-crowd' ),
+				),
+				array(
+					'key'          => 'field_rowdy_crowd_suburb',
+					'label'        => __( 'Suburb', 'rowdy-crowd' ),
+					'name'         => self::SUBURB,
+					'type'         => 'text',
+					'instructions' => __( 'Shown in the address and used for search. Leave blank to use the map\'s.', 'rowdy-crowd' ),
+					'wrapper'      => array( 'width' => '34' ),
+				),
+				array(
+					'key'          => 'field_rowdy_crowd_state',
+					'label'        => __( 'State', 'rowdy-crowd' ),
+					'name'         => self::STATE,
+					'type'         => 'text',
+					'instructions' => __( 'Abbreviation, e.g. NSW. Used for the state filter.', 'rowdy-crowd' ),
+					'maxlength'    => 3,
+					'wrapper'      => array( 'width' => '33' ),
+				),
+				array(
+					'key'          => 'field_rowdy_crowd_postcode',
+					'label'        => __( 'Postcode', 'rowdy-crowd' ),
+					'name'         => self::POSTCODE,
+					'type'         => 'text',
+					'instructions' => __( 'Shown in the address and used for search.', 'rowdy-crowd' ),
+					'maxlength'    => 10,
+					'wrapper'      => array( 'width' => '33' ),
 				),
 				array(
 					'key'   => 'field_rowdy_crowd_phone',

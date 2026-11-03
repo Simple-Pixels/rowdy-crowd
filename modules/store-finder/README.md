@@ -24,13 +24,28 @@ The post **title** is the store name. The fields:
 
 | Field | Required | Notes |
 | --- | --- | --- |
-| Store location | Yes | Google Map field. Search for the store and pick its address. The pin, suburb, state and postcode all come from this, so the address is only entered once. |
+| Store location | Yes | Google Map field. Search for the store and pick its address. This gives the pin and, when the address is picked from Google's search, the suburb, state and postcode too. |
 | Street address | No | Replaces the street part of the address shown to customers, e.g. `Shop 2, 76 George Street`. Blank uses the street from the map. |
+| Suburb | No | Shown in the address and used for search. Blank uses the map's. |
+| State | No | Abbreviation, e.g. `NSW` (upper-cased automatically). Used for the **state chips** and search. Blank uses the map's. |
+| Postcode | No | Shown in the address and used for search. Blank uses the map's. |
 | Phone | No | Shown as a tap-to-call link. |
 | Website | No | Include `https://`. Shown without the scheme, e.g. `seasontotaste.au`. |
 | Region | Yes | Australia or United States. Defaults to Australia. |
 
 A stockist **without a map location is not shown on the site**. The Stockists list flags these in the Address column.
+
+### Where the suburb, state and postcode come from
+
+For each stockist the finder uses the first of these that has a value, separately for suburb, state and postcode:
+
+1. The stockist's own **Suburb / State / Postcode** fields.
+2. The parts of the Google Map value (`city`, `state_short`, `post_code`). These are filled in whenever an address is picked from Google's search on the stockist screen.
+3. Whatever can be read from the map's address text, e.g. `15 Waltham Street, Sandringham VIC 3191, Australia`.
+
+If none of them has a state, the store still shows (with the street) but gets no state chip and can't be found by postcode.
+
+**Imports:** an import that only saves a street and a pin into the map field (as the first WP All Import did) leaves steps 2 and 3 empty, so every store showed only its street, there were no chips, and postcode search found nothing. Map the CSV's `suburb`, `state` and `postcode` columns to the three fields above and the stores fill in. They don't need to be repeated in the map field.
 
 ## `[store_finder]`
 
@@ -42,7 +57,7 @@ A stockist **without a map location is not shown on the site**. The Stockists li
 | Attribute | Default | Notes |
 | --- | --- | --- |
 | `region` | `current` | `current` shows the stores for the site being viewed (rowdycrowd.com.au → Australia, rowdycrowd.com → United States). `aunz`, `usa` or `all` override that. |
-| `height` | `560px` | Height of the map and list. A CSS length (`px`, `vh`, `rem`, `em`, `%`). |
+| `height` | `720px` | Height of the map and list (420px for the map on phones). A CSS length (`px`, `vh`, `rem`, `em`, `%`). |
 | `class` | empty | Extra CSS classes on the wrapper. |
 
 What visitors get:
@@ -103,13 +118,13 @@ The finder uses Rowdy Crowd's brand palette, defined as custom properties on `.r
 | --- | --- | --- |
 | `--rowdy-crowd-ink` | `#403A35` | Body text. |
 | `--rowdy-crowd-blue` | `#316195` | Links, focus rings, the pressed "Stores near me" button, the NSW chip. |
-| `--rowdy-crowd-teal` | `#00BBB4` | "Stores near me" button, the chosen card, the VIC chip. |
+| `--rowdy-crowd-teal` | `#00BBB4` | The chosen card, the VIC chip, the "Nearest store" note. |
 | `--rowdy-crowd-pink` | `#E93CAC` | State chips (ACT, WA). The map pins use the **pin colour** setting, which defaults to this. |
-| `--rowdy-crowd-orange` | `#FF6418` | QLD chip, location error messages. |
+| `--rowdy-crowd-orange` | `#FF6418` | The **Stores near me** button (white text), the QLD chip, location error messages. |
 | `--rowdy-crowd-lime` | `#B7BF10` | SA chip, distance badges, the "no stores" card. |
 | `--rowdy-crowd-on-colour` | `#1F1B19` | Text on the pink, teal, orange and lime fills. |
 
-**Contrast:** only blue and the ink are used as text colours on white. Pink, teal, orange and lime are too light for that (under 4.5:1), so they're used as fills and tints with near-black text, which passes. Keep that if you change the colours. State chip colours come from `Stockists::chip_colour()`. Other custom property: `--rowdy-crowd-store-finder-height` (set by the `height` attribute).
+**Contrast:** only blue and the ink are used as text colours on white. Pink, teal, orange and lime are too light for that (under 4.5:1), so they're used as fills and tints with near-black text, which passes. **One exception, at the client's request:** the Stores near me button is white on brand orange, which is 2.96:1: a little under even the 3:1 minimum for large text. It's bold and full size to help. A deeper orange (about `#C2410C`) would pass AA if that's ever wanted. Keep the near-black rule for anything new. State chip colours come from `Stockists::chip_colour()`. Other custom property: `--rowdy-crowd-store-finder-height` (set by the `height` attribute).
 
 ## Hooks
 
@@ -133,6 +148,9 @@ None yet. Region helpers come from the geolocation module (`Region::current()`).
 
 - **The map needs a pin.** Stores without a Google Map location are left out. They show a warning in the Stockists list.
 - **Stores only show on their own region's site** unless the shortcode uses `region="all"`. Stores with no region saved count as Australia.
+- **WP Rocket and stale scripts.** WP Rocket copies each script and style into `wp-content/cache/min` and can keep serving that copy after the file changes. The finder once went live with the *new* page and CSS but the *old* script for logged-out visitors (near-me, card clicks and the popup all dead), while the logged-in admin saw the real files and noticed nothing. The plugin now excludes its own files from WP Rocket's minify cache (`includes/class-wp-rocket.php`), so a version bump always serves the real file. After the deploy that adds this, **clear the WP Rocket cache once** (Clear and preload cache), because the pages still point at the old minified file until then. To check as a visitor: open the page in a private window and look at the script URL; it should end `.../rowdy-crowd/.../store-finder.js?ver=<plugin version>`, not `wp-content/cache/min/...`.
+- **Test as a logged-out visitor.** Admins can be served different files and cached pages.
+- **Every `<button>` inherits `white-space: nowrap` from Hello Elementor**, so the store-name button sets `white-space: normal` or long names make the list scroll sideways.
 - **The key needs the Places API as well as Maps JavaScript**, or the address search on the stockist screen won't work even though the front-end map does.
 - **The key must allow every domain** the site is served from, including the staging domain, or the map is replaced by the list (and the stockist screen's address search fails).
 - **`DEMO_MAP_ID`** is Google's sample ID. It works, but create a real Map ID for the live site.

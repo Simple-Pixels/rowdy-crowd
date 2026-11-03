@@ -17,6 +17,17 @@ defined( 'ABSPATH' ) || exit;
  */
 final class Stockist {
 
+	private const AU_STATES = array(
+		'ACT' => 'Australian Capital Territory',
+		'NSW' => 'New South Wales',
+		'NT'  => 'Northern Territory',
+		'QLD' => 'Queensland',
+		'SA'  => 'South Australia',
+		'TAS' => 'Tasmania',
+		'VIC' => 'Victoria',
+		'WA'  => 'Western Australia',
+	);
+
 	public function __construct(
 		public readonly int $id,
 		public readonly string $name,
@@ -29,7 +40,8 @@ final class Stockist {
 		public readonly string $postcode,
 		public readonly string $phone,
 		public readonly string $website,
-		public readonly string $region
+		public readonly string $region,
+		public readonly string $map_address
 	) {}
 
 	/**
@@ -48,9 +60,16 @@ final class Stockist {
 			return null;
 		}
 
-		$street = trim( (string) get_field( Stockist_Fields::ADDRESS, $post_id ) );
-		$region = (string) get_field( Stockist_Fields::REGION, $post_id );
-		$state  = (string) ( $location['state_short'] ?? '' );
+		$street      = trim( (string) get_field( Stockist_Fields::ADDRESS, $post_id ) );
+		$region      = (string) get_field( Stockist_Fields::REGION, $post_id );
+		$map_address = (string) ( $location['address'] ?? '' );
+		$parsed      = self::locality_from_address( $map_address );
+
+		// Suburb, state and postcode: the stockist's own fields, then the map's parts, then
+		// whatever can be read out of the map's address text.
+		$suburb   = self::first( (string) get_field( Stockist_Fields::SUBURB, $post_id ), (string) ( $location['city'] ?? '' ), $parsed['suburb'] );
+		$state    = strtoupper( self::first( (string) get_field( Stockist_Fields::STATE, $post_id ), (string) ( $location['state_short'] ?? '' ), $parsed['state'] ) );
+		$postcode = self::first( (string) get_field( Stockist_Fields::POSTCODE, $post_id ), (string) ( $location['post_code'] ?? '' ), $parsed['postcode'] );
 
 		return new self(
 			$post_id,
@@ -58,13 +77,76 @@ final class Stockist {
 			(float) $location['lat'],
 			(float) $location['lng'],
 			'' !== $street ? $street : self::street_from_location( $location ),
-			(string) ( $location['city'] ?? '' ),
+			$suburb,
 			$state,
-			(string) ( $location['state'] ?? $state ),
-			(string) ( $location['post_code'] ?? '' ),
+			self::state_name( $state, $location ),
+			$postcode,
 			trim( (string) get_field( Stockist_Fields::PHONE, $post_id ) ),
 			trim( (string) get_field( Stockist_Fields::WEBSITE, $post_id ) ),
-			Region::is_valid( $region ) ? $region : Region::DEFAULT_REGION
+			Region::is_valid( $region ) ? $region : Region::DEFAULT_REGION,
+			$map_address
+		);
+	}
+
+	/**
+	 * The first value that isn't blank, or ''.
+	 *
+	 * @param string ...$values Candidates, best first.
+	 */
+	private static function first( string ...$values ): string {
+		foreach ( $values as $value ) {
+			if ( '' !== trim( $value ) ) {
+				return trim( $value );
+			}
+		}
+
+		return '';
+	}
+
+	/**
+	 * Full state name for a code: the map's own name when it matches, else a known Australian
+	 * state, else the code itself.
+	 *
+	 * @param string               $code     State code, e.g. "NSW".
+	 * @param array<string, mixed> $location ACF Google Map value.
+	 */
+	private static function state_name( string $code, array $location ): string {
+		if ( '' === $code ) {
+			return '';
+		}
+
+		$map_name = (string) ( $location['state'] ?? '' );
+
+		if ( '' !== $map_name && strtoupper( (string) ( $location['state_short'] ?? '' ) ) === $code ) {
+			return $map_name;
+		}
+
+		return self::AU_STATES[ $code ] ?? $code;
+	}
+
+	/**
+	 * Reads the suburb, state and postcode out of an address such as
+	 * "76 George St, Bathurst NSW 2795, Australia" or "1 Main St, Austin, TX 78701, USA".
+	 * Anything it can't find comes back blank.
+	 *
+	 * @param string $address Address text from the Google Map value.
+	 * @return array{suburb: string, state: string, postcode: string}
+	 */
+	private static function locality_from_address( string $address ): array {
+		$blank = array(
+			'suburb'   => '',
+			'state'    => '',
+			'postcode' => '',
+		);
+
+		if ( ! preg_match( '/,\s*([^,]+?),?\s+([A-Z]{2,3})\s+(\d{4,5})\b/', $address, $matches ) ) {
+			return $blank;
+		}
+
+		return array(
+			'suburb'   => trim( $matches[1] ),
+			'state'    => $matches[2],
+			'postcode' => $matches[3],
 		);
 	}
 
@@ -121,7 +203,7 @@ final class Stockist {
 	 */
 	public function search_text(): string {
 		return mb_strtolower(
-			implode( ' ', array( $this->name, $this->street, $this->suburb, $this->state_code, $this->state_name, $this->postcode ) ),
+			implode( ' ', array( $this->name, $this->street, $this->suburb, $this->state_code, $this->state_name, $this->postcode, $this->map_address ) ),
 			'UTF-8'
 		);
 	}
