@@ -64,7 +64,7 @@ What visitors get:
 
 - **Search** (matches store name, street, suburb, state or postcode; every word must match).
 - **State chips**: one per state that has stores, outlined in the state's brand colour with a store count (e.g. `NSW 31`), plus **All**. The chosen chip is filled with its colour and has white text, whatever the colour. Pick one to filter. The number of stores showing sits at the right of the chip row (under the chips on phones). With more than 12 states (e.g. the US) a dropdown is used instead.
-- **Stores near me**: asks the browser for the visitor's location, then sorts the list nearest first with the distance on each card (km, or miles on the US site), marks the visitor on the map and frames the nearest few stores. Press it again to go back. Messages appear as a **toast at the bottom centre of the screen**: "Finding stores near you…" while it works (it stays until there's an answer), then "Nearest store: 4.2 km away" for about 6 seconds. If location is blocked, times out or isn't available, an orange-edged toast says so and suggests searching instead (about 8 seconds). Switching near-me off clears it. The location stays in the browser: nothing is sent to the server or stored.
+- **Stores near me**: asks the browser for the visitor's location, then sorts the list nearest first with the distance on each card (km, or miles on the US site), marks the visitor on the map and frames the nearest few stores. Press it again to go back. Messages appear as a **toast at the bottom centre of the screen**: "Finding stores near you…" while it works (it stays until there's an answer), then "Nearest store: 4.2 km away" for about 6 seconds. If location is blocked, times out or isn't available, a toast says so and suggests searching instead (about 8 seconds). Switching near-me off clears it. The location stays in the browser: nothing is sent to the server or stored.
 - **A list** sorted by state, suburb and name, with address, phone, website and **Directions** (opens Google Maps).
 - **A map** with a pin per store. **Clicking anywhere on a store's card** zooms the map to that store and opens its info window; clicking a pin does the reverse and highlights the card. Links inside a card (phone, website, directions) still work as links. The store name is a real button underneath, so keyboard and screen-reader users can select a store too.
 - Search and the filters update the list and the pins together.
@@ -118,9 +118,9 @@ The finder uses Rowdy Crowd's brand palette, defined as custom properties on `.r
 | --- | --- | --- |
 | `--rowdy-crowd-ink` | `#403A35` | Body text. |
 | `--rowdy-crowd-blue` | `#316195` | Links, focus rings, the pressed "Stores near me" button, the NSW chip. |
-| `--rowdy-crowd-teal` | `#00BBB4` | The chosen card, the VIC chip, the "Nearest store" note. |
+| `--rowdy-crowd-teal` | `#00BBB4` | The chosen card (tint and ring), the VIC chip. |
 | `--rowdy-crowd-pink` | `#E93CAC` | State chips (ACT, WA). The map pins use the **pin colour** setting, which defaults to this. |
-| `--rowdy-crowd-orange` | `#FF6418` | The **Stores near me** button (white text), the QLD chip, the edge of error toasts. |
+| `--rowdy-crowd-orange` | `#FF6418` | The **Stores near me** button (white text), the QLD chip. |
 | `--rowdy-crowd-lime` | `#B7BF10` | SA chip, distance badges, the "no stores" card. |
 | `--rowdy-crowd-on-colour` | `#1F1B19` | Text on the pink, teal, orange and lime fills. |
 
