@@ -5,7 +5,7 @@
 | | |
 | --- | --- |
 | Type | Site-specific (Rowdy Crowd, `rowdycrowd.com.au` / `rowdycrowd.com`) |
-| Version | 0.3.0 (`ROWDY_CROWD_VERSION` + plugin header) |
+| Version | 0.3.1 (`ROWDY_CROWD_VERSION` + plugin header) |
 | Main file | `rowdy-crowd.php` |
 | Text domain | `rowdy-crowd` |
 | Prefix | `RowdyCrowd\` (namespaces), `rowdy_crowd_` (hooks, options, meta), `ROWDY_CROWD_` (constants), `rowdy-crowd-` (handles, CSS) |
@@ -122,6 +122,7 @@ Module hooks are listed in each module's README (e.g. `rowdy_crowd_region`, `row
 
 | Version | Notes |
 | --- | --- |
+| 0.3.1 | Fix switcher shrinking on hover/focus (the Elementor kit removed its border). Smaller, lighter text. |
 | 0.3.0 | Currency module with `[currency_switcher]`. `[region_switcher]` now also switches currency (AUD/USD). Both switchers share one dropdown: no flags, transparent background, white border. Hello World module removed. |
 | 0.2.0 | Geolocation module (AU/US regions, redirect, switcher). |
 | 0.1.0 | Base plugin: autoloader, module system, hello-world module. |
