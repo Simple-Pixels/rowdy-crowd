@@ -45,6 +45,7 @@ From the scoping doc and rough hours estimate (Oct 2026). Items marked *(plugin)
 | CIN7 | Inventory integration: product mapping, order management. |
 | Geolocation *(plugin)* | AU/US detection, dynamic content, pricing integration, printer-based order notifications, CookieYes and GDPR compliance. |
 | Quote generation *(plugin)* | Quote generation logic and WooCommerce integration. Keep a traditional enquiry pathway for customers who need help. |
+| Store finder *(plugin)* | Stockist locator replacing the static Shopify find-a-store page (added Nov 2026, not in the original estimate). |
 
 ### Geolocation and regions (spec, Oct 2026)
 
@@ -69,6 +70,17 @@ Built in `modules/currency/` plus the region switcher in `modules/geolocation/`.
 - Both switchers use the **shared `Dropdown`** (`includes/class-dropdown.php`, root `assets/dropdown.*`): **no flags, transparent background, white border**. Reuse it for any new dropdown rather than writing a new one.
 - The Hello World placeholder module was removed in 0.3.0.
 - Open question: first-time visitors who haven't chosen a currency. The plan is to rely on WooPayments' "automatically switch currency based on location" setting. Cached pages may also show a stale currency label. Both need testing on live.
+
+### Store finder (spec, Nov 2026)
+
+Built in `modules/store-finder/`. See its README. It replaces the static find-a-store list on the old Shopify site (about 70 Australian stockists, grouped by state; each has a store name, street address, suburb, state, postcode, optional phone and optional website). It was based on the client's `Simple-Pixels/simple-maps` component, folded into this plugin.
+
+- **`rc_stockist` post type** (not public: no pages of its own; `rc_` matches the site's existing `rc_faq`). Title = store name.
+- **ACF fields defined in code**: a Google Map field is the single source for pin, suburb, state and postcode. Optional street-address override, phone, website, and a region (Australia or United States).
+- **Region**: each stockist belongs to a region and `[store_finder]` shows the current site's stores by default (`region="all"` overrides). There is no US stockist data yet.
+- **Finder**: server-rendered list plus Google Map, a search box and a state filter. Works without JS; JS adds search, filter and map.
+- **Google Maps**: key (and optional Map ID, pin colour) under Stockists → Settings, or the `ROWDY_CROWD_GOOGLE_MAPS_API_KEY` constant. Needs the Maps JavaScript and Places APIs. Advanced markers are used because `google.maps.Marker` is deprecated.
+- Not built yet: a bulk import for the existing stockists, and "near me" / postcode distance search.
 
 ### Homepage (approved wireframe)
 

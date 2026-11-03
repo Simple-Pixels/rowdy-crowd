@@ -37,3 +37,4 @@ Other classes in the module follow the same naming: `RowdyCrowd\Modules\Quote_Ge
 | --- | --- | --- |
 | [geolocation](geolocation/) | In progress | AU/US regions by domain, `aunz`/`usa` visibility classes, first-visit geo redirect, `[region_switcher]` (also switches currency). |
 | [currency](currency/) | In progress | `[currency_switcher]` for WooPayments Multi-Currency (AUD, EUR, NZD, GBP, USD). |
+| [store-finder](store-finder/) | In progress | Stockists post type and `[store_finder]`: searchable store list with a Google Map. |
