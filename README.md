@@ -5,7 +5,7 @@
 | | |
 | --- | --- |
 | Type | Site-specific (Rowdy Crowd, `rowdycrowd.com.au` / `rowdycrowd.com`) |
-| Version | 0.4.1 (`ROWDY_CROWD_VERSION` + plugin header) |
+| Version | 0.5.0 (`ROWDY_CROWD_VERSION` + plugin header) |
 | Main file | `rowdy-crowd.php` |
 | Text domain | `rowdy-crowd` |
 | Prefix | `RowdyCrowd\` (namespaces), `rowdy_crowd_` (hooks, options, meta), `ROWDY_CROWD_` (constants), `rowdy-crowd-` (handles, CSS) |
@@ -125,6 +125,7 @@ Module hooks are listed in each module's README (e.g. `rowdy_crowd_region`, `row
 
 | Version | Notes |
 | --- | --- |
+| 0.5.0 | Store finder: state chips, "Stores near me", clickable store cards (the "Show on map" button is gone), a tighter info window, brand colours beyond pink, and a stable layout when no stores match. |
 | 0.4.1 | Stockist fields are saved to ACF's database (ACF → Field Groups) so WP All Import can see them. |
 | 0.4.0 | Store finder module: Stockists post type, Google Maps settings and `[store_finder]` (searchable list, state filter, map). |
 | 0.3.1 | Fix switcher shrinking on hover/focus (the Elementor kit removed its border). Smaller, lighter text. |

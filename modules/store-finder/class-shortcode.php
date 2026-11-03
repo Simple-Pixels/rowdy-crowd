@@ -31,6 +31,11 @@ final class Shortcode {
 	private const DEFAULT_HEIGHT = '560px';
 
 	/**
+	 * Most states that get a filter chip each. More than this (e.g. US states) uses a dropdown.
+	 */
+	private const MAX_CHIP_STATES = 12;
+
+	/**
 	 * @param string $assets_url    URL of the module's assets folder (trailing slash).
 	 * @param string $template_path Absolute path of the markup template.
 	 */
@@ -90,7 +95,8 @@ final class Shortcode {
 			self::TAG
 		);
 
-		$stockists = Stockists::for_region( $this->resolve_region( (string) $atts['region'] ) );
+		$region    = $this->resolve_region( (string) $atts['region'] );
+		$stockists = Stockists::for_region( $region );
 
 		if ( empty( $stockists ) ) {
 			return '<p class="rowdy-crowd-store-finder-empty">' . esc_html__( 'We don\'t have any stores listed here yet. Please check back soon.', 'rowdy-crowd' ) . '</p>';
@@ -105,17 +111,23 @@ final class Shortcode {
 			wp_enqueue_script( self::MAPS_HANDLE );
 		}
 
+		$states = Stockists::states( $stockists );
+
 		return $this->render_template(
 			array(
-				'id'        => wp_unique_id( 'rowdy-crowd-store-finder-' ),
-				'classes'   => trim( 'rowdy-crowd-store-finder ' . ( $has_map ? 'rowdy-crowd-store-finder--map ' : '' ) . $this->sanitize_classes( (string) $atts['class'] ) ),
-				'height'    => $this->sanitize_height( (string) $atts['height'] ),
-				'accent'    => Settings::pin_color(),
-				'map_id'    => Settings::map_id(),
-				'has_map'   => $has_map,
-				'stockists' => $stockists,
-				'states'    => Stockists::states( $stockists ),
-				'notice'    => $has_map ? '' : $this->admin_notice( __( 'The map is hidden until a Google Maps API key is added under Stockists → Settings.', 'rowdy-crowd' ) ),
+				'id'         => wp_unique_id( 'rowdy-crowd-store-finder-' ),
+				'classes'    => trim( 'rowdy-crowd-store-finder ' . ( $has_map ? 'rowdy-crowd-store-finder--map ' : '' ) . $this->sanitize_classes( (string) $atts['class'] ) ),
+				'height'     => $this->sanitize_height( (string) $atts['height'] ),
+				'pin_color'  => Settings::pin_color(),
+				'map_id'     => Settings::map_id(),
+				'has_map'    => $has_map,
+				'stockists'  => $stockists,
+				'states'     => $states,
+				'counts'     => Stockists::state_counts( $stockists ),
+				'use_chips'  => count( $states ) > 1 && count( $states ) <= self::MAX_CHIP_STATES,
+				// Distances in miles for the US site, kilometres everywhere else.
+				'units'      => Region::USA === $region ? 'mi' : 'km',
+				'notice'     => $has_map ? '' : $this->admin_notice( __( 'The map is hidden until a Google Maps API key is added under Stockists → Settings.', 'rowdy-crowd' ) ),
 			)
 		);
 	}

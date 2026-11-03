@@ -1,16 +1,24 @@
 /**
- * Store finder: search, state filter, store list and map.
+ * Store finder: search, state chips, "Stores near me", store list and map.
  *
- * --rowdy-crowd-store-finder-accent and --rowdy-crowd-store-finder-height are set inline from
- * the pin colour setting and the shortcode's height attribute.
+ * Colours are Rowdy Crowd's brand palette. Pink, teal, orange and lime are too light to use as
+ * text on white, so they're used as fills and tints (with near-black text); links and focus
+ * rings use blue, and body text uses the brand's dark ink. All of those pass WCAG AA.
+ *
+ * --rowdy-crowd-store-finder-height is set inline from the shortcode's height attribute.
  */
 .rowdy-crowd-store-finder {
-	--rowdy-crowd-store-finder-accent: #e93cac;
+	--rowdy-crowd-pink: #e93cac;
+	--rowdy-crowd-teal: #00bbb4;
+	--rowdy-crowd-orange: #ff6418;
+	--rowdy-crowd-lime: #b7bf10;
+	--rowdy-crowd-blue: #316195;
+	--rowdy-crowd-ink: #403a35;
+	--rowdy-crowd-on-colour: #1f1b19; /* Text on pink, teal, orange and lime fills. */
+	--rowdy-crowd-line: rgba(64, 58, 53, 0.16);
 	--rowdy-crowd-store-finder-height: 560px;
-	--rowdy-crowd-store-finder-text: var(--e-global-color-text, #403a35);
-	--rowdy-crowd-store-finder-border: rgba(0, 0, 0, 0.14);
 
-	color: var(--rowdy-crowd-store-finder-text);
+	color: var(--rowdy-crowd-ink);
 }
 
 .rowdy-crowd-store-finder [hidden] {
@@ -30,21 +38,62 @@
 	border: 0;
 }
 
+.rowdy-crowd-store-finder a {
+	color: var(--rowdy-crowd-blue);
+	text-decoration: underline;
+	text-underline-offset: 0.18em;
+}
+
+.rowdy-crowd-store-finder a:hover {
+	color: #234a73;
+}
+
+.rowdy-crowd-store-finder :is(a, input, select, button):focus-visible {
+	outline: 2px solid var(--rowdy-crowd-blue);
+	outline-offset: 2px;
+}
+
 .rowdy-crowd-store-finder__notice {
 	margin: 0 0 1rem;
 	padding: 0.6em 1em;
-	border-left: 4px solid var(--rowdy-crowd-store-finder-accent);
-	background: rgba(0, 0, 0, 0.04);
+	border-left: 4px solid var(--rowdy-crowd-lime);
+	background: rgba(183, 191, 16, 0.12);
 	font-size: 0.9em;
+}
+
+/*
+ * Buttons. The Elementor kit restyles every <button> on hover and focus (accent background,
+ * no border), so each button's look is repeated for every state. This shared rule strips the
+ * theme's styling; the rules after it put each button's own look back.
+ */
+.rowdy-crowd-store-finder :is(.rowdy-crowd-store-finder__near-me, .rowdy-crowd-store-finder__chip, .rowdy-crowd-store-finder__select, .rowdy-crowd-store-finder__clear, .rowdy-crowd-store-finder__info-close),
+.rowdy-crowd-store-finder :is(.rowdy-crowd-store-finder__near-me, .rowdy-crowd-store-finder__chip, .rowdy-crowd-store-finder__select, .rowdy-crowd-store-finder__clear, .rowdy-crowd-store-finder__info-close):is(:hover, :focus, :active) {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-radius: 0;
+	background: transparent;
+	box-shadow: none;
+	color: inherit;
+	font: inherit;
+	letter-spacing: normal;
+	text-decoration: none;
+	text-transform: none;
+	cursor: pointer;
 }
 
 /* Controls */
 .rowdy-crowd-store-finder__controls {
+	display: grid;
+	gap: 0.9rem;
+	margin-bottom: 1.25rem;
+}
+
+.rowdy-crowd-store-finder__bar {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
-	gap: 0.75rem 1rem;
-	margin-bottom: 1rem;
+	gap: 0.75rem;
 }
 
 .rowdy-crowd-store-finder .rowdy-crowd-store-finder__search,
@@ -52,7 +101,7 @@
 	box-sizing: border-box;
 	margin: 0;
 	padding: 0.65em 1.1em;
-	border: 1px solid var(--rowdy-crowd-store-finder-border);
+	border: 2px solid var(--rowdy-crowd-line);
 	border-radius: 999px;
 	background-color: #fff;
 	box-shadow: none;
@@ -66,42 +115,193 @@
 	flex: 1 1 260px;
 }
 
-.rowdy-crowd-store-finder .rowdy-crowd-store-finder__state {
-	flex: 0 1 240px;
-}
-
 .rowdy-crowd-store-finder .rowdy-crowd-store-finder__search:focus,
 .rowdy-crowd-store-finder .rowdy-crowd-store-finder__state:focus {
-	border-color: var(--rowdy-crowd-store-finder-accent);
-	outline: 2px solid var(--rowdy-crowd-store-finder-accent);
-	outline-offset: 1px;
+	border-color: var(--rowdy-crowd-blue);
+}
+
+/* "Stores near me": teal until pressed, then blue. */
+.rowdy-crowd-store-finder .rowdy-crowd-store-finder__near-me,
+.rowdy-crowd-store-finder .rowdy-crowd-store-finder__near-me:is(:hover, :focus, :active) {
+	display: inline-flex;
+	flex: 0 0 auto;
+	align-items: center;
+	gap: 0.55em;
+	padding: 0.65em 1.25em;
+	border: 2px solid var(--rowdy-crowd-teal);
+	border-radius: 999px;
+	background: var(--rowdy-crowd-teal);
+	color: var(--rowdy-crowd-on-colour);
+	font-size: 0.95em;
+	font-weight: 700;
+	line-height: 1.3;
+}
+
+.rowdy-crowd-store-finder .rowdy-crowd-store-finder__near-me:hover {
+	box-shadow: 0 3px 0 rgba(0, 0, 0, 0.18);
+	transform: translateY(-1px);
+}
+
+.rowdy-crowd-store-finder .rowdy-crowd-store-finder__near-me[aria-pressed="true"],
+.rowdy-crowd-store-finder .rowdy-crowd-store-finder__near-me[aria-pressed="true"]:is(:hover, :focus, :active) {
+	border-color: var(--rowdy-crowd-blue);
+	background: var(--rowdy-crowd-blue);
+	color: #fff;
+}
+
+.rowdy-crowd-store-finder__near-me[aria-busy="true"] .rowdy-crowd-store-finder__icon {
+	animation: rowdy-crowd-store-finder-spin 1s linear infinite;
+}
+
+@keyframes rowdy-crowd-store-finder-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.rowdy-crowd-store-finder__near-me[aria-busy="true"] .rowdy-crowd-store-finder__icon {
+		animation: none;
+	}
+
+	.rowdy-crowd-store-finder .rowdy-crowd-store-finder__near-me:hover {
+		transform: none;
+	}
+}
+
+/* State chips: outlined in the state's colour, filled when chosen. */
+.rowdy-crowd-store-finder__chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+}
+
+.rowdy-crowd-store-finder__chip--all {
+	--chip: var(--rowdy-crowd-ink);
+	--chip-on: #fff;
+}
+
+.rowdy-crowd-store-finder__chip--pink {
+	--chip: var(--rowdy-crowd-pink);
+	--chip-on: var(--rowdy-crowd-on-colour);
+}
+
+.rowdy-crowd-store-finder__chip--teal {
+	--chip: var(--rowdy-crowd-teal);
+	--chip-on: var(--rowdy-crowd-on-colour);
+}
+
+.rowdy-crowd-store-finder__chip--orange {
+	--chip: var(--rowdy-crowd-orange);
+	--chip-on: var(--rowdy-crowd-on-colour);
+}
+
+.rowdy-crowd-store-finder__chip--lime {
+	--chip: var(--rowdy-crowd-lime);
+	--chip-on: var(--rowdy-crowd-on-colour);
+}
+
+.rowdy-crowd-store-finder__chip--blue {
+	--chip: var(--rowdy-crowd-blue);
+	--chip-on: #fff;
+}
+
+.rowdy-crowd-store-finder .rowdy-crowd-store-finder__chip,
+.rowdy-crowd-store-finder .rowdy-crowd-store-finder__chip:is(:hover, :focus, :active) {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4em;
+	padding: 0.4em 0.95em;
+	border: 2px solid var(--chip, var(--rowdy-crowd-ink));
+	border-radius: 999px;
+	background: #fff;
+	color: var(--rowdy-crowd-ink);
+	font-size: 0.88em;
+	font-weight: 700;
+	line-height: 1.2;
+}
+
+.rowdy-crowd-store-finder .rowdy-crowd-store-finder__chip:hover {
+	background: rgba(64, 58, 53, 0.06);
+	background: color-mix(in srgb, var(--chip, var(--rowdy-crowd-ink)) 16%, #fff);
+}
+
+.rowdy-crowd-store-finder .rowdy-crowd-store-finder__chip[aria-pressed="true"],
+.rowdy-crowd-store-finder .rowdy-crowd-store-finder__chip[aria-pressed="true"]:is(:hover, :focus, :active) {
+	background: var(--chip, var(--rowdy-crowd-ink));
+	color: var(--chip-on, #fff);
+}
+
+/* A tick as well as the fill, so the chosen chip isn't shown by colour alone. */
+.rowdy-crowd-store-finder__chip[aria-pressed="true"]::before {
+	content: "\2713";
+	font-weight: 700;
+}
+
+.rowdy-crowd-store-finder__chip-count {
+	font-size: 0.85em;
+	font-weight: 600;
+	opacity: 0.8;
+}
+
+.rowdy-crowd-store-finder__status {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.5rem 1rem;
 }
 
 .rowdy-crowd-store-finder__count {
-	flex: 0 0 auto;
 	margin: 0;
 	font-size: 0.9em;
-	opacity: 0.75;
+	font-weight: 600;
+	opacity: 0.8;
 }
 
-.rowdy-crowd-store-finder__empty {
-	margin: 0 0 1rem;
+.rowdy-crowd-store-finder__message {
+	margin: 0;
+	padding: 0.4em 0.9em;
+	border-left: 4px solid var(--rowdy-crowd-teal);
+	border-radius: 8px;
+	background: rgba(0, 187, 180, 0.12);
+	font-size: 0.9em;
+}
+
+.rowdy-crowd-store-finder__message.is-error {
+	border-left-color: var(--rowdy-crowd-orange);
+	background: rgba(255, 100, 24, 0.12);
 }
 
 /* List and map */
 .rowdy-crowd-store-finder__body {
 	display: grid;
+	grid-template-areas: "list";
 	grid-template-columns: 1fr;
 	gap: 1.25rem;
 	align-items: start;
 }
 
 .rowdy-crowd-store-finder--map .rowdy-crowd-store-finder__body {
+	grid-template-areas: "list map";
 	grid-template-columns: minmax(280px, 380px) minmax(0, 1fr);
 }
 
 .rowdy-crowd-store-finder.has-map-error .rowdy-crowd-store-finder__body {
+	grid-template-areas: "list";
 	grid-template-columns: 1fr;
+}
+
+.rowdy-crowd-store-finder__list,
+.rowdy-crowd-store-finder__empty {
+	grid-area: list;
+}
+
+.rowdy-crowd-store-finder__map {
+	grid-area: map;
+	height: var(--rowdy-crowd-store-finder-height);
+	overflow: hidden;
+	border-radius: 14px;
+	background: #e9ecef;
 }
 
 .rowdy-crowd-store-finder__list {
@@ -111,7 +311,7 @@
 	overflow-y: auto;
 	max-height: var(--rowdy-crowd-store-finder-height);
 	list-style: none;
-	border: 1px solid var(--rowdy-crowd-store-finder-border);
+	border: 1px solid var(--rowdy-crowd-line);
 	border-radius: 14px;
 	background: #fff;
 }
@@ -121,16 +321,16 @@
 .rowdy-crowd-store-finder.has-map-error .rowdy-crowd-store-finder__list {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+	gap: 1rem;
 	max-height: none;
 	overflow: visible;
 	border: 0;
 	background: transparent;
-	gap: 1rem;
 }
 
 .rowdy-crowd-store-finder:not(.rowdy-crowd-store-finder--map) .rowdy-crowd-store-finder__item,
 .rowdy-crowd-store-finder.has-map-error .rowdy-crowd-store-finder__item {
-	border: 1px solid var(--rowdy-crowd-store-finder-border);
+	border: 1px solid var(--rowdy-crowd-line);
 	border-radius: 14px;
 	background: #fff;
 }
@@ -138,17 +338,26 @@
 .rowdy-crowd-store-finder__item {
 	margin: 0;
 	padding: 1rem 1.15rem;
-	border-bottom: 1px solid var(--rowdy-crowd-store-finder-border);
+	border-bottom: 1px solid var(--rowdy-crowd-line);
+	transition: background-color 0.15s ease;
 }
 
 .rowdy-crowd-store-finder__item:last-child {
 	border-bottom: 0;
 }
 
-.rowdy-crowd-store-finder__item.is-active {
-	background: rgba(0, 0, 0, 0.03);
-	background: color-mix(in srgb, var(--rowdy-crowd-store-finder-accent) 9%, #fff);
-	box-shadow: inset 4px 0 0 var(--rowdy-crowd-store-finder-accent);
+/* The whole card selects the store once the map is there. */
+.rowdy-crowd-store-finder.is-map-ready .rowdy-crowd-store-finder__item {
+	cursor: pointer;
+}
+
+.rowdy-crowd-store-finder.is-map-ready .rowdy-crowd-store-finder__item:hover {
+	background: rgba(0, 187, 180, 0.07);
+}
+
+.rowdy-crowd-store-finder .rowdy-crowd-store-finder__item.is-active {
+	background: rgba(0, 187, 180, 0.15);
+	box-shadow: inset 4px 0 0 var(--rowdy-crowd-teal);
 }
 
 .rowdy-crowd-store-finder__item p {
@@ -158,13 +367,40 @@
 }
 
 .rowdy-crowd-store-finder .rowdy-crowd-store-finder__name {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 0.6rem;
 	font-size: 1.05em;
 	font-weight: 700;
 }
 
-.rowdy-crowd-store-finder a {
-	color: var(--rowdy-crowd-store-finder-accent);
-	text-decoration: underline;
+/* The store name is a button, for keyboards and screen readers, but looks like text. */
+.rowdy-crowd-store-finder .rowdy-crowd-store-finder__select,
+.rowdy-crowd-store-finder .rowdy-crowd-store-finder__select:is(:hover, :focus, :active, :disabled) {
+	flex: 1 1 auto;
+	font-weight: 700;
+	text-align: left;
+	cursor: inherit;
+	opacity: 1;
+}
+
+.rowdy-crowd-store-finder .rowdy-crowd-store-finder__select:focus-visible {
+	border-radius: 4px;
+	outline: 2px solid var(--rowdy-crowd-blue);
+	outline-offset: 3px;
+}
+
+/* Distance from the visitor, after "Stores near me". */
+.rowdy-crowd-store-finder__distance {
+	flex: 0 0 auto;
+	padding: 0.1em 0.65em;
+	border-radius: 999px;
+	background: var(--rowdy-crowd-lime);
+	color: var(--rowdy-crowd-on-colour);
+	font-size: 0.78em;
+	font-weight: 700;
+	white-space: nowrap;
 }
 
 .rowdy-crowd-store-finder__actions {
@@ -174,49 +410,66 @@
 	margin-top: 0.6em !important;
 }
 
-/*
- * The Elementor kit restyles every button on hover and focus (accent background, no border),
- * so the look is repeated for each state to keep it a plain text link.
- */
-.rowdy-crowd-store-finder .rowdy-crowd-store-finder__locate,
-.rowdy-crowd-store-finder .rowdy-crowd-store-finder__locate:hover,
-.rowdy-crowd-store-finder .rowdy-crowd-store-finder__locate:focus,
-.rowdy-crowd-store-finder .rowdy-crowd-store-finder__locate:active {
-	margin: 0;
-	padding: 0;
-	border: 0;
-	border-radius: 0;
-	background: transparent;
-	box-shadow: none;
-	color: var(--rowdy-crowd-store-finder-accent);
-	font: inherit;
-	font-weight: 600;
-	letter-spacing: normal;
-	text-decoration: underline;
-	text-transform: none;
-	cursor: pointer;
+.rowdy-crowd-store-finder__directions {
+	font-weight: 700;
 }
 
-.rowdy-crowd-store-finder .rowdy-crowd-store-finder__locate:focus-visible {
-	outline: 2px solid var(--rowdy-crowd-store-finder-accent);
-	outline-offset: 2px;
-}
-
-/* "Show on map" only makes sense once the map is there. */
-.rowdy-crowd-store-finder:not(.is-map-ready) .rowdy-crowd-store-finder__locate {
-	display: none;
-}
-
-.rowdy-crowd-store-finder__map {
-	height: var(--rowdy-crowd-store-finder-height);
-	overflow: hidden;
+/* Nothing matches: sits in the list's place so the map stays put. */
+.rowdy-crowd-store-finder__empty {
+	padding: 1.5rem 1.25rem;
+	border: 2px dashed var(--rowdy-crowd-lime);
 	border-radius: 14px;
-	background: #e9ecef;
+	background: rgba(183, 191, 16, 0.1);
+	text-align: center;
 }
 
-/* Info window content (copied from the list item). */
+.rowdy-crowd-store-finder__empty p {
+	margin: 0 0 0.5em;
+}
+
+.rowdy-crowd-store-finder .rowdy-crowd-store-finder__empty-title {
+	font-weight: 700;
+}
+
+.rowdy-crowd-store-finder .rowdy-crowd-store-finder__clear,
+.rowdy-crowd-store-finder .rowdy-crowd-store-finder__clear:is(:hover, :focus, :active) {
+	display: inline-block;
+	margin-top: 0.5em;
+	padding: 0.5em 1.2em;
+	border: 2px solid var(--rowdy-crowd-blue);
+	border-radius: 999px;
+	background: #fff;
+	color: var(--rowdy-crowd-blue);
+	font-size: 0.9em;
+	font-weight: 700;
+}
+
+.rowdy-crowd-store-finder .rowdy-crowd-store-finder__clear:hover {
+	background: var(--rowdy-crowd-blue);
+	color: #fff;
+}
+
+/* The visitor's position on the map. */
+.rowdy-crowd-store-finder__you {
+	width: 18px;
+	height: 18px;
+	border: 3px solid #fff;
+	border-radius: 50%;
+	background: var(--rowdy-crowd-blue);
+	box-shadow: 0 0 0 3px rgba(49, 97, 149, 0.3), 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+/*
+ * Info window content (copied from the list item). Google's popup adds 12px above, to the left
+ * and below; the padding here brings the text to 16px from the top and left. Only the name
+ * leaves room on the right for the close button, so the other lines can use the full width.
+ */
 .rowdy-crowd-store-finder__info {
-	color: var(--rowdy-crowd-store-finder-text);
+	position: relative;
+	min-width: 190px;
+	padding: 4px 8px 0 4px;
+	color: var(--rowdy-crowd-ink);
+	font-family: var(--e-global-typography-text-font-family, "Montserrat"), system-ui, sans-serif;
 	font-size: 14px;
 	line-height: 1.45;
 }
@@ -226,28 +479,58 @@
 }
 
 .rowdy-crowd-store-finder__info .rowdy-crowd-store-finder__name {
+	display: block;
+	padding-right: 32px; /* Clear of the close button. */
 	font-size: 15px;
-	font-weight: 700;
 }
 
-.rowdy-crowd-store-finder__info .rowdy-crowd-store-finder__directions {
-	display: inline-block;
-	margin-top: 0.4em;
-	font-weight: 600;
+.rowdy-crowd-store-finder__info .rowdy-crowd-store-finder__actions {
+	margin-top: 0.5em !important;
+}
+
+.rowdy-crowd-store-finder .rowdy-crowd-store-finder__info-close,
+.rowdy-crowd-store-finder .rowdy-crowd-store-finder__info-close:is(:hover, :focus, :active) {
+	position: absolute;
+	top: -4px;
+	right: 8px;
+	width: 28px;
+	height: 28px;
+	border-radius: 50%;
+	background: rgba(64, 58, 53, 0.08);
+	color: var(--rowdy-crowd-ink);
+	font-size: 20px;
+	line-height: 1;
+	text-align: center;
+}
+
+.rowdy-crowd-store-finder .rowdy-crowd-store-finder__info-close:hover {
+	background: rgba(64, 58, 53, 0.18);
 }
 
 @media (max-width: 767px) {
 	.rowdy-crowd-store-finder--map .rowdy-crowd-store-finder__body {
+		grid-template-areas: "map" "list";
 		grid-template-columns: 1fr;
 	}
 
-	/* Map first on phones, then the list. */
-	.rowdy-crowd-store-finder--map .rowdy-crowd-store-finder__map {
-		order: -1;
+	.rowdy-crowd-store-finder__map {
 		height: 360px;
 	}
 
 	.rowdy-crowd-store-finder__list {
 		max-height: 60vh;
+	}
+
+	/* One scrolling row of chips instead of a tall wrapped block. */
+	.rowdy-crowd-store-finder__chips {
+		flex-wrap: nowrap;
+		margin-inline: -0.25rem;
+		padding: 0.25rem;
+		overflow-x: auto;
+		scrollbar-width: thin;
+	}
+
+	.rowdy-crowd-store-finder .rowdy-crowd-store-finder__chip {
+		flex: 0 0 auto;
 	}
 }
